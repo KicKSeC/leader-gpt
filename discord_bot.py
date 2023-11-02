@@ -9,63 +9,67 @@ DESCRIPTION = 'leader gpt can help your team!'
 
 
 class LeaderClient(discord.Client):
-    def __init__(self, *, intents, channel, **options):
-        super().__init__(intents=intents, options=options)
+    async def on_ready(self):
+        #
         self.command_keywords = { 'hello': self.say_hello, 'dice': self.roll }
-        self.channel = self.get_channel(channel)
+        self.channel = self.get_channel(CHANNEL_ID)
 
         if self.channel is None:
-            raise AttributeError(f"Channel {channel} is not found")
-            
-    
-    async def on_ready(self):
-        print(f'Logged on as {self.user}')
+            raise AttributeError(f"Channel {CHANNEL_ID} is not found")
         await self.change_presence(status=discord.Status.online,
                                    activity=discord.Game("성실"))
-        await self.channel.send('Hello World!')
+        print(f'Logged on as {self.user}') 
+        await self.channel.send('Commands: ' + ', '.join(self.command_keywords.keys()))
         
     async def on_message(self, message):
-        if message.author == self.user:
+        if message.author == self.user: # ignore message of itself
             return
+    
+        if message.content.startswith('!'): # if it's command symbol
+            await self.answer(message)            # answer to command
 
-        if message.content.startswith('!'):
-            await self.answer(message)
-
-    async def answer(self, message):
-        is_answered = False
-        answer = ""
+    async def answer(self, message): 
         # check message.content is command
-        for keyword in list(self.command_keywords.keys):
+        for keyword in list(self.command_keywords.keys()):
             if message.content.lower().startswith('!'+keyword):
                 # if this's command, remove command keyword and
-                # get answer of the command
-                answer = await self.command_keywords[keyword](
-                    message.content.replace('!'+keyword+' ', '', 1))
-                is_answered = True
-                break
-       
-        if not is_answered:
-            answer = chatgpt.get_response(message.content)
-            await self.channel.send(answer)
-           
-    def say_hello(self, message):
-        return f'Hello! {message.author}'
-   
-    async def roll(self, dice: str):
-        """Rolls a dice in NdN format
+                # get answer of the command 
+                await self.command_keywords[keyword](message)   
+                return
+        # if it's not command, then get response from chatgpt on chatgpt.py 
+        await message.add_reaction('✔')
+        answer = chatgpt.get_response(message.content)
+        await self.channel.send(answer)     # send answer 
+    
+    def trim_message_content(self, message) -> str:
+        """trim command in message content"""
+        content = message.content[1:]   # trim command symbol
 
-        Args:
-            dice (str): NdN format
-        """
+        # trim keyword
+        for keyword in list(self.command_keywords.keys()):
+            if content.lower().startswith(keyword):
+                content = content.replace(keyword, '', 1)
+
+        # trim white space
+        while content.startswith(' '):
+            content = content[1:]
+
+        return content
+           
+    async def say_hello(self, message):
+        """send hello"""
+        await self.channel.send(f'Hello! {message.author}')
+   
+    async def roll(self, message):
+        """roll dices and send numbers of dices"""
         try:
+            dice = self.trim_message_content(message)
             rolls, limit = map(int, dice.split('d'))
-        except Exception:
+        except ValueError:
             await self.channel.send('Format has to be in NdN!')
             return
 
-        result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
-
-        return result
+        await self.channel.send(', '.join(str(random.randint(1, limit)) for r in range(rolls))) 
 
 
 intents = discord.Intents.default()
