@@ -4,18 +4,20 @@ import discord
 import chatgpt
 
 BOT_TOKEN = os.getenv('DISCORD_TOKEN')
-CHANNEL_ID = int(os.getenv('PLOEI_CHANNEL_ID'))
+CHANNEL_ID = int(os.getenv('TEAMPROJECT_CHANNEL_ID'))
 DESCRIPTION = 'leader gpt can help your team!'
+GPT_ANSWER_CHECK = '✔'
 
 
 class LeaderClient(discord.Client):
     async def on_ready(self):
         #
-        self.command_keywords = { 'hello': self.say_hello, 'dice': self.roll }
+        self.command_keywords = { 'hello': self.say_hello, 'dice': self.roll, '!': self.gpt4_answer }
         self.channel = self.get_channel(CHANNEL_ID)
 
         if self.channel is None:
             raise AttributeError(f"Channel {CHANNEL_ID} is not found")
+        
         await self.change_presence(status=discord.Status.online,
                                    activity=discord.Game("성실"))
         print(f'Logged on as {self.user}') 
@@ -37,7 +39,7 @@ class LeaderClient(discord.Client):
                 await self.command_keywords[keyword](message)   
                 return
         # if it's not command, then get response from chatgpt on chatgpt.py 
-        await message.add_reaction('✔')
+        await message.add_reaction(GPT_ANSWER_CHECK)
         answer = chatgpt.get_response(message.content)
         await self.channel.send(answer)     # send answer 
     
@@ -70,6 +72,12 @@ class LeaderClient(discord.Client):
             return
 
         await self.channel.send(', '.join(str(random.randint(1, limit)) for r in range(rolls))) 
+        
+    async def gpt4_answer(self, message):
+        content = self.trim_message_content(message)
+        await message.add_reaction(GPT_ANSWER_CHECK)
+        answer = chatgpt.get_response(content, model=chatgpt.gpt_model['gpt4'])
+        await self.channel.send(answer)
 
 
 intents = discord.Intents.default()
