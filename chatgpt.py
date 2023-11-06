@@ -24,7 +24,7 @@ def get_response_object(message, model=gpt_model["gpt3.5"], user='user'):
     )
     
     logging.info('getting token usage')
-    increase_token_usage(response.usage.total_tokens)
+    _increase_token_usage(response.usage.total_tokens)
     
     return response
 
