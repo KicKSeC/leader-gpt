@@ -1,9 +1,9 @@
-import chatgpt
 import datetime
 import random
 import discord
 from discord.ext import commands, tasks
 import matplotlib.pyplot as plt
+from chatgpt import ChatGPT
 
 # TODO 더 나은 팀 규칙 생성 프롬프트 작성
 PROMPT_CREATE_RULE = "팀을 위한 규칙을 나열해"
@@ -20,7 +20,7 @@ class LGPTCommand(commands.Cog):
         self.role = {}
         self.rules = []
         self.assignments = {}
-
+    
     @commands.group(name="도움말")
     async def help(self, ctx: discord.ext.commands.Context):
         """사용자가 '도움말' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다."""
@@ -151,9 +151,10 @@ class LGPTCommand(commands.Cog):
     async def create_rule(self, ctx):
         """사용자가 '규칙 생성' 명령어를 입력하면 실행되는 함수입니다. 규칙을 생성합니다."""
         await ctx.send("chatGPT를 통해 규칙생성")
-        rule = chatgpt.get_response(PROMPT_CREATE_RULE)
-        await ctx.send(rule)
-        self.rules.append(rule)
+        if not ChatGPT.is_answering:    # 챗지피티가 이미 사용되고 있지는 않은지 확인
+            rule = ChatGPT().get_response(message=PROMPT_CREATE_RULE)
+            await ctx.send(rule)
+            self.rules.append(rule)
 
     @rule.command(name="추가")
     async def append_rule(self, ctx, new_rule):
