@@ -62,6 +62,3 @@ def send(from_email, pwd, to_email, subject, content, file_path=None, server="na
             return "메세지가 성공적으로 발송되었습니다"
         else:
             return "메세지가 정상적으로 발송되지 못하였습니다"
-    
-if __name__ == "__main__":
-    print(send("gud3594@naver.com", "qhwkrl3594", "gud3594@gmail.com", "hello", "world"))
