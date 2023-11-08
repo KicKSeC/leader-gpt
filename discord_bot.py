@@ -89,7 +89,7 @@ class LeaderClient(discord.Client):
             return
         
         await message.add_reaction(GPT_ANSWER_CHECK)
-        answer = chatgpt.get_response(content, model=chatgpt.gpt_model['gpt4'])
+        answer = chatgpt.get_response(content, model=chatgpt.gpt_model['gpt4-turbo'])
         await self.channel.send(answer)
         
     async def get_token_usage(self, message):
