@@ -1,7 +1,0 @@
-discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
-discord.client - INFO - logging in using static token
-discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 3c2a2dfe44cf061d3c5e4d636319747c).
-root - INFO - returning message
-root - INFO - await to get response
-openai - INFO - error_code=None error_message="We could not parse the JSON body of your request. (HINT: This likely means you aren't using your HTTP library correctly. The OpenAI API expects a JSON payload, but what was sent was not valid JSON. If you have trouble figuring out how to fix this, please contact us through our help center at help.openai.com.)" error_param=None error_type=invalid_request_error message='OpenAI API error received' stream_error=False
-root - ERROR - We could not parse the JSON body of your request. (HINT: This likely means you aren't using your HTTP library correctly. The OpenAI API expects a JSON payload, but what was sent was not valid JSON. If you have trouble figuring out how to fix this, please contact us through our help center at help.openai.com.)
