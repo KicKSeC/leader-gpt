@@ -1,5 +1,5 @@
 ﻿import smtplib
-from email.mime.multipart import MIMEMultipart
+from email.mime.multipart import MIMEMultipart # pip install MIME && pip install email
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
