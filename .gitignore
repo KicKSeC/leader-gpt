@@ -1,3 +1,4 @@
 ﻿.env
 .venv
+bot_command.log
 chatlog.log

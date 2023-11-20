@@ -4,6 +4,11 @@ import discord
 from discord.ext import commands, tasks
 import matplotlib.pyplot as plt
 from chatgpt import ChatGPT
+import logging
+
+# 로그 파일 설정
+logging.basicConfig(filename='bot_command.log', level=logging.INFO,
+                    format='%(asctime)s:%(levelname)s:%(message)s')
 
 # TODO 더 나은 팀 규칙 생성 프롬프트 작성
 PROMPT_CREATE_RULE = "팀을 위한 규칙을 나열해"
@@ -16,28 +21,29 @@ class LGPTCommand(commands.Cog):
         """
         self.bot = bot
         self.next_meeting = ""
+        self.commands = ["도움말", "팀원평가", "평가", "회의시간", "역할분담", 
+                         "회의록 작성", "규칙", "과제", "그래프"]
         self.evaluations = {}
         self.role = {}
         self.rules = []
         self.assignments = {}
+        
+        self.chatgpt = ChatGPT()    
+        
+        # 대화를 기록하기 위한 변수들
+        self.conversation = {}     # 메세지가 기록되는 딕셔너리. {'대화명', [[이름, 내용], ...]}
+        self.record_names = []     # 기록되는 대화의 이름들
     
     @commands.group(name="도움말")
     async def help(self, ctx: discord.ext.commands.Context):
         """사용자가 '도움말' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다."""
         # 만약 서브 커맨드가 없다면, 사용 가능한 명령어 목록을 출력합니다.
         if ctx.invoked_subcommand is None:
-            await ctx.send("명령어 목록\n"
-                           "- 팀원평가\n"
-                           "- 평가\n"
-                           "- 회의시간\n"
-                           "- 역할분담\n"
-                           "- 프로젝트일정\n"
-                           "- 제촉하기\n"
-                           "- 규칙")
+            await ctx.send("\n- ".join(["명령어 목록"] + self.commands))
 
     @commands.group(name="팀원평가")
     async def review_group(self, ctx):
-        """'팀원평가' 그룹 커맨드를 정의합니다사용자가 '팀원평가' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다."""
+        """'팀원평가' 그룹 커맨드를 정의합니다. 사용자가 '팀원평가' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다."""
         if ctx.invoked_subcommand is None:
             await ctx.send("익명 혹은 실명을 선택해주세요. (예: !팀원평가 익명)")
 
@@ -90,7 +96,7 @@ class LGPTCommand(commands.Cog):
 
     @commands.group(name="역할분담")
     async def role_dividing(self, ctx):
-        """사용자가 '역할분담' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다.           """
+        """사용자가 '역할분담' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다."""
         # 만약 서브 커맨드가 없다면, 역할분담 방식과 역할을 입력하도록 안내합니다.
         if ctx.invoked_subcommand is None:
             await ctx.send("역할분담 방식과 역할을 입력해주세요\n"
@@ -152,7 +158,7 @@ class LGPTCommand(commands.Cog):
         """사용자가 '규칙 생성' 명령어를 입력하면 실행되는 함수입니다. 규칙을 생성합니다."""
         await ctx.send("chatGPT를 통해 규칙생성")
         if not ChatGPT.is_answering:    # 챗지피티가 이미 사용되고 있지는 않은지 확인
-            rule = ChatGPT().get_response(message=PROMPT_CREATE_RULE)
+            rule = ChatGPT.get_response(message=PROMPT_CREATE_RULE)
             await ctx.send(rule)
             self.rules.append(rule)
 
@@ -232,3 +238,44 @@ class LGPTCommand(commands.Cog):
         plt.savefig('graph.png')
         file = discord.File("graph.png", filename="graph.png")
         await ctx.send(file=file)
+        
+    @commands.group(name="기록")
+    async def record(self, ctx):
+        '''디스코드간에 오가는 대화를 기록합니다.'''
+        if ctx.invoked_subcommand is None:
+            await ctx.send("기록 시작, 기록 종료, 기록 보이기")
+        
+    @record.command(name="시작")
+    async def start_record(self, ctx):
+        """기록 시작"""
+        if "기록" in self.record_names:
+            await ctx.send("이미 기록중입니다.")
+            return
+    
+        await ctx.send("기록 시작")
+        self.record_names.append("기록")
+        self.conversation["기록"] = []
+        
+    @record.command(name="종료")
+    async def end_record(self, ctx):
+        """기록 종료"""
+        await ctx.send("기록 종료")
+        self.record_names.remove("기록")
+
+    @record.command(name="보이기")
+    async def show_record(self, ctx):
+        """기록된 내용을 보여줌""" 
+        result = "'기록'의 내용은\n"
+        for message in self.conversation["기록"]:
+            result += f"{message[0]}: {message[1]}\n"
+        await ctx.send(result)
+     
+    @commands.Cog.listener()
+    async def on_message(self, ctx):
+        '''디스코드 상의 오가는 대화를 기록되는 리스트에 저장''' 
+        for record_name in self.record_names:
+            if ctx.author != self.bot.user:
+                self.conversation[record_name].append([ctx.author.name, ctx.content])
+
+    # TODO 이모지 투표 기능 추가
+    # 이모지 API https://discordpy-ko.github.io/api.html#discord.Emoji
