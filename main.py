@@ -1,5 +1,6 @@
-import discord
 import os
+import discord
+from dotenv import load_dotenv
 from discord.ext import commands
 from bot_command import LGPTCommand
 
@@ -20,5 +21,5 @@ async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
         await ctx.send("존재하지 않는 명령어입니다.")
 
-
+load_dotenv()
 bot.run(os.getenv('DISCORD_TOKEN'))
