@@ -1,5 +1,4 @@
-﻿.env
-.venv
+﻿data.py
 __pycache__
 bot_command.log
-chatlog.log
+chatgpt.log

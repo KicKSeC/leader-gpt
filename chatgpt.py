@@ -1,6 +1,13 @@
-﻿import os       # 환경 변수 접근
+﻿import os       
+import logging
 import openai
+from data import KeyData
 from openai import OpenAI
+
+
+# 로그 파일 설정
+logging.basicConfig(filename='chatgpt.log', level=logging.INFO,
+                    format='%(asctime)s:%(levelname)s:%(message)s')
 
 
 class ChatGPT:
@@ -12,12 +19,14 @@ class ChatGPT:
                 "content": "You are a supportive team leader and enabler of your teammates' goals."}
     is_answering = False
     token_usage = 0     # 사용된 총 토큰 수
-    __client = OpenAI()
+    __client = OpenAI(api_key=KeyData.OPENAI_API_KEY)
 
     class AlreadyAnsweringError(Exception):
         """ChatGPT는 한번에 하나만 답변 가능하므로 이미 답변 중일 때 발생하는 에러"""
         def __init__(self):
-            super().__init__("ChatGPT가 이미 답변 중입니다.") 
+            message = "ChatGPT가 이미 답변 중입니다."
+            logging.error(message)
+            super().__init__(message) 
         
     @staticmethod
     def get_response_object(message, model=gpt_model["gpt3.5"], user='user'): 
@@ -26,23 +35,22 @@ class ChatGPT:
             raise ChatGPT.AlreadyAnsweringError()
 
         ChatGPT.is_answering = True
-        response = ChatGPT.__client.chat.completions.create(
-            model=model, messages=[ChatGPT.system_role, {"role": user, "content": message}]
-        )
-        ChatGPT.is_answering = False
+        logging.info('chatGpt answering')
+        try:
+            response = ChatGPT.__client.chat.completions.create(
+                model=model, messages=[ChatGPT.system_role, {"role": user, "content": message}]
+            )
+        finally:
+            ChatGPT.is_answering = False
 
         ChatGPT.token_usage += response.usage.total_tokens
-        
         return response
 
     # 응답 객체의 메세지 내용
     @staticmethod
     def get_response(message, model=gpt_model["gpt3.5"], user='user'):
-        """답변을 문자열로 반환"""
-        try:
-            return ChatGPT.get_response_object(message, model=model, user=user).choices[0].message.content
-        except openai.BadRequestError:
-            return '답변에 오류가 발생하였습니다.'
+        """답변을 문자열로 반환""" 
+        return ChatGPT.get_response_object(message, model=model, user=user).choices[0].message.content 
         # try: 
         #     return get_response_object(message, user=user).choice[0].message.content
         # except Exception as e:
@@ -57,6 +65,7 @@ class ChatGPT:
     # TODO 이어서 대화하기, 대화 끊기, 여러 개 동시에 대화하기
 
 if __name__ == '__main__':
-    INTRO = "간략히 자기소개 부탁해"
-    print(INTRO + ": " + ChatGPT.get_response(INTRO))
+    INTRO = "3줄로 자기소개 부탁해"
+    print(INTRO)
+    print(ChatGPT.get_response(INTRO))
     
