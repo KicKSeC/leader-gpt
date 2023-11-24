@@ -1,5 +1,4 @@
 ﻿data.py
 __pycache__
 .vscode
-bot_command.log
-chatgpt.log
+data
