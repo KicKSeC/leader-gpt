@@ -1,19 +1,16 @@
-﻿import os       
-import logging
-import openai
+﻿import logging
 from data import KeyData
 from openai import OpenAI
 
 
 # 로그 파일 설정
-logging.basicConfig(filename='chatgpt.log', level=logging.INFO,
+logging.basicConfig(filename='data\\chatgpt.log', level=logging.INFO,
                     format='%(asctime)s:%(levelname)s:%(message)s')
 
 
 class ChatGPT:
     '''ChatGPT의 API를 사용해 팀장으로서 답변을 생성'''
-    gpt_model = {"davinci": "text-davinch-003", "gpt3.5": "gpt-3.5-turbo",
-                "babbage": "babbage-002", "gpt4": "gpt-4", "gpt4-turbo": "gpt-4-1106-preview"}
+    gpt_model = {"gpt3.5": "gpt-3.5-turbo", "gpt4-turbo": "gpt-4-1106-preview"}
     # 팀장으로 설정하는 프롬프트
     system_role = {"role": "system",
                 "content": "You are a supportive team leader and enabler of your teammates' goals."}
@@ -29,7 +26,7 @@ class ChatGPT:
             super().__init__(message) 
         
     @staticmethod
-    def get_response_object(message, model=gpt_model["gpt3.5"], user='user'): 
+    def get_response_object(message:str, model=gpt_model["gpt3.5"], user='user'): 
         """챗지피티의 응답 객체 반환"""
         if ChatGPT.is_answering:
             raise ChatGPT.AlreadyAnsweringError()
@@ -38,19 +35,28 @@ class ChatGPT:
         logging.info('chatGpt answering')
         try:
             response = ChatGPT.__client.chat.completions.create(
-                model=model, messages=[ChatGPT.system_role, {"role": user, "content": message}]
+                model=model, 
+                messages=[
+                    ChatGPT.system_role,
+                    {"role": user, "content": message}
+                ] # type: ignore
             )
         finally:
             ChatGPT.is_answering = False
 
-        ChatGPT.token_usage += response.usage.total_tokens
+        if not response.usage is None:
+            ChatGPT.token_usage += response.usage.total_tokens
         return response
 
     # 응답 객체의 메세지 내용
     @staticmethod
-    def get_response(message, model=gpt_model["gpt3.5"], user='user'):
+    def get_response(message:str, model=gpt_model["gpt3.5"], user='user') -> str:
         """답변을 문자열로 반환""" 
-        return ChatGPT.get_response_object(message, model=model, user=user).choices[0].message.content 
+        result = ChatGPT.get_response_object(message, model=model, user=user).choices[0].message.content 
+        
+        if not result:
+            return "답변에 오류가 있었습니다."
+        return result
         # try: 
         #     return get_response_object(message, user=user).choice[0].message.content
         # except Exception as e:
