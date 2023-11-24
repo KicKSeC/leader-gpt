@@ -1,17 +1,18 @@
 import datetime
 import random
+import logging                          # 디버깅하기 위해 
 import discord
-from discord.ext import commands, tasks
 import matplotlib.pyplot as plt
+from discord.ext import commands, tasks
 from chatgpt import ChatGPT
-import logging
 
-# 로그 파일 설정
-logging.basicConfig(filename='bot_command.log', level=logging.INFO,
+
+logging.basicConfig(filename='bot_command.log', level=logging.INFO,     # 로그 파일 설정
                     format='%(asctime)s:%(levelname)s:%(message)s')
 
 # TODO 더 나은 팀 규칙 생성 프롬프트 작성
-PROMPT_CREATE_RULE = "팀을 위한 규칙을 나열해"
+PROMPT_CREATE_RULE = "팀을 위한 규칙을 숫자 없이 나열해. 조원이 불참했을 때, 분쟁이 있을 때 등등"
+PROMPT_CREATE_MEETING_LOG = "서기로서, 아래 나열되는 회의 대화를 요약, 정리, 나열해서 회의록을 작성해"
 
 class LGPTCommand(commands.Cog):
     def __init__(self, bot):
@@ -22,7 +23,7 @@ class LGPTCommand(commands.Cog):
         self.bot = bot
         self.next_meeting = ""
         self.commands = ["도움말", "팀원평가", "평가", "회의시간", "역할분담", 
-                         "회의록 작성", "규칙", "과제", "그래프"]
+                         "회의록작성", "규칙", "과제", "그래프"]
         self.evaluations = {}
         self.role = {}
         self.rules = []
@@ -33,6 +34,9 @@ class LGPTCommand(commands.Cog):
         # 대화를 기록하기 위한 변수들
         self.conversation = {}     # 메세지가 기록되는 딕셔너리. {'대화명', [[이름, 내용], ...]}
         self.record_names = []     # 기록되는 대화의 이름들
+
+        # chatgpt 관련
+        self.check_answer.start()
     
     @commands.group(name="도움말")
     async def help(self, ctx: discord.ext.commands.Context):
@@ -142,11 +146,6 @@ class LGPTCommand(commands.Cog):
         await ctx.send("역할분담 결과\n"
                        f"{result}")
 
-    @commands.command(name="회의록작성")
-    async def create_MOM(self, ctx):
-        """사용자가 '회의록작성' 명령어를 입력하면 실행되는 함수입니다. 회의록 작성을 시작합니다."""
-        await ctx.send("회의록 작성")
-
     @commands.group(name="규칙")
     async def rule(self, ctx):
         """사용자가 '규칙' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다"""
@@ -156,11 +155,17 @@ class LGPTCommand(commands.Cog):
     @rule.command(name="생성")
     async def create_rule(self, ctx):
         """사용자가 '규칙 생성' 명령어를 입력하면 실행되는 함수입니다. 규칙을 생성합니다."""
-        await ctx.send("chatGPT를 통해 규칙생성")
         if not ChatGPT.is_answering:    # 챗지피티가 이미 사용되고 있지는 않은지 확인
-            rule = ChatGPT.get_response(message=PROMPT_CREATE_RULE)
-            await ctx.send(rule)
-            self.rules.append(rule)
+            logging.info('chatgpt create rule')
+            await ctx.send("ChatGPT를 통해 규칙생성")
+            rules = ChatGPT.get_response(message=PROMPT_CREATE_RULE)
+            await ctx.send(rules)
+            
+            # 나열된 규칙을 개별적으로 나누어 (빈 거 제외하고) 각각 저장
+            for rule in [x for x in rules.split('\n') if x != ""]:
+                self.rules.append(rule)
+        else:
+            await ctx.send("이미 답변 중에 있습니다. 답변 이후에 요청해 주십시오.")
 
     @rule.command(name="추가")
     async def append_rule(self, ctx, new_rule):
@@ -269,10 +274,33 @@ class LGPTCommand(commands.Cog):
         for message in self.conversation["기록"]:
             result += f"{message[0]}: {message[1]}\n"
         await ctx.send(result)
-     
+
+    @commands.command(name="회의록작성")
+    async def create_meeting_log(self, ctx):
+        """사용자가 '회의록작성' 명령어를 입력하면 실행되는 함수입니다. 회의록 작성을 시작합니다."""
+        if self.conversation["기록"] == []:
+            await ctx.send("기록된 회의가 없습니다. '!기록 시작'으로 회의를 기록하십시오.")
+            return
+
+        await ctx.send("회의록 작성중...")
+        prompt = PROMPT_CREATE_MEETING_LOG + "\n" + "\n".join([f"{msg[0]}: {msg[1]}" for msg in self.conversation['기록']])
+        
+        meeting_log = ChatGPT.get_response(prompt) 
+        
+        logging.info(meeting_log)
+        await ctx.send(meeting_log)
+        
+    @tasks.loop(seconds=5)
+    async def check_answer(self):
+        '''chatgpt 답변이 길어길 때 heartbeat 유지를 위한 코드'''
+        if ChatGPT.is_answering:
+            await self.bot.change_presence(activity=discord.Game("답변"))
+        else:
+            await self.bot.change_presence(status=discord.Status.idle)
+            
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        '''디스코드 상의 오가는 대화를 기록되는 리스트에 저장''' 
+        '''디스코드 상의 오가는 대화를 각각의 리스트에 저장''' 
         for record_name in self.record_names:
             if ctx.author != self.bot.user:
                 self.conversation[record_name].append([ctx.author.name, ctx.content])
