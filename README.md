@@ -5,9 +5,11 @@
 ## 토큰을 저장하는 방법
 ChatGPT와 디스코드 봇의 보안을 유지하는 일은 중요합니다.
 이 파일이 있는 경로에 'data.py'를 추가하고, 아래와 같이 입력합니다
-> class KeyData: 
->    OPENAI_API_KEY="Open API 키"
->    DISCORD_TOKEN="디스코드 토큰"  
+```
+class KeyData: 
+    OPENAI_API_KEY="Open API 키"
+    DISCORD_TOKEN="디스코드 토큰"
+```
 
 필요한 데이터 목록
 - OPEN_API_KEY
