@@ -14,7 +14,7 @@ class LGPTCommand(commands.Cog):
         봇, 다음 회의 시간, 평가, 역할, 규칙, 과제 등 여러 속성을 초기화합니다.
         """
         self.bot = bot
-        self.commands = ["도움말", "팀원평가", "평가", "회의시간", "역할분담",
+        self.commands = ["", "도움말", "팀원평가", "평가", "회의시간", "역할분담",
                          "회의록작성", "규칙", "과제", "그래프"]
 
     @commands.group(name="도움말")
@@ -22,8 +22,14 @@ class LGPTCommand(commands.Cog):
         """사용자가 '도움말' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다."""
         # 만약 서브 커맨드가 없다면, 사용 가능한 명령어 목록을 출력합니다.
         if ctx.invoked_subcommand is None:
-            await ctx.send("\n- ".join(["명령어 목록"] + self.commands))
+            embed = discord.Embed(
+                title="명령어 목록",
+                description='\n- '.join(self.commands),
+                color=0x3498db  # 임베드 색상 설정
+            )
+            await ctx.send(embed=embed)
 
+    # 최종 구현여부가 정해지지 않은 기능
     @commands.command(name="그래프")
     async def show_graph(self, ctx):
         x = [1, 2, 3, 4]
