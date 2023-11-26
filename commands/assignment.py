@@ -41,7 +41,7 @@ class Assignment(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @assignment_group.command(name="확인")ㅍ
+    @assignment_group.command(name="확인")
     async def show_assignment(self, ctx):
         """사용자가 '과제 확인' 명령어를 입력하면 실행되는 함수입니다. 모든 멤버의 과제를 출력합니다"""
         members = ctx.guild.members
