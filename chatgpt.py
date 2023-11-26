@@ -44,7 +44,7 @@ class ChatGPT:
         finally:
             ChatGPT.is_answering = False
 
-        if not response.usage is None:
+        if response.usage:
             ChatGPT.token_usage += response.usage.total_tokens
         return response
 
