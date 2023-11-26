@@ -10,7 +10,6 @@ class RoleDistribution(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-
         self.role = {}
 
     @commands.group(name="역할분담")
@@ -18,12 +17,17 @@ class RoleDistribution(commands.Cog):
         """사용자가 '역할분담' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다."""
         # 만약 서브 커맨드가 없다면, 역할분담 방식과 역할을 입력하도록 안내합니다.
         if ctx.invoked_subcommand is None:
-            await ctx.send("역할분담 방식과 역할을 입력해주세요\n"
-                           "- 자동분배\n"
-                           "- 사다리타기\n"
-                           "- 제비뽑기\n"
-                           "예: !역할분담 자동분배 역할1 역할2 역할3"
-                           "역할이 입력되지 않는다면 역할이 숫자로 분배됩니다")
+            embed = discord.Embed(
+                title="명령어 목록",
+                description="역할분담 방식과 역할을 입력해주세요\n"
+                            "- 자동분배\n"
+                            "- 사다리타기\n"
+                            "- 제비뽑기\n"
+                            "예: !역할분담 자동분배 역할1 역할2 역할3\n"
+                            "역할이 입력되지 않는다면 역할이 숫자로 분배됩니다",
+                color=0x3498db
+            )
+            await ctx.send(embed=embed)
 
     @role_dividing.command(name="자동분배")
     async def role_random(self, ctx, *roles):
@@ -50,7 +54,7 @@ class RoleDistribution(commands.Cog):
         result = ""
         for r in self.role:
             result += f"{r}: {self.role[r]}\n"
-        await ctx.send(result)
+        await ctx.send(embed=discord.Embed(description="역할분담이 완료되었습니다\n'!역할분담 결과'를 통해 결과를 확인하세요", color=0x3498db))
 
     @role_dividing.command(name="결과")
     async def role_result(self, ctx):
@@ -58,5 +62,4 @@ class RoleDistribution(commands.Cog):
         result = ""
         for r in self.role:
             result += f"- {r}: {self.role[r]}\n"
-        await ctx.send("역할분담 결과\n"
-                       f"{result}")
+        await ctx.send(embed=discord.Embed(title="역할분담 결과", description=result, color=0x3498db))
