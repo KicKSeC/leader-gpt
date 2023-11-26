@@ -18,10 +18,14 @@ class Assignment(commands.Cog):
         """사용자가 '과제' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다"""
         # 만약 서브 커맨드가 없다면, 추가 명령어를 입력하도록 안내합니다
         if ctx.invoked_subcommand is None:
-            await ctx.send("추가 명령어를 입력해주세요\n"
-                           "- 부여\n"
-                           "- 확인\n"
-                           "- 제출")
+            embed = discord.Embed(
+                title="추가 명령어를 입력해주세요",
+                description="- 부여\n"
+                            "- 확인\n"
+                            "- 제출",
+                color=0x3498db
+            )
+            await ctx.send(embed=embed)
 
     @assignment_group.command(name="부여")
     async def assign_assignment(self, ctx, content, deadline):
@@ -31,9 +35,13 @@ class Assignment(commands.Cog):
             self.assignments[user] = [{'과제명': content, '마감일': deadline}]
         else:  # 이 사용자에게 이미 과제가 부여된 경우, 과제 리스트에 새로운 과제를 추가합니다.
             self.assignments[user].append({'과제명': content, '마감일': deadline})
-        await ctx.send('과제 부여 완료')
+        embed = discord.Embed(
+            description="과제 부여 완료",
+            color=0x3498db
+        )
+        await ctx.send(embed=embed)
 
-    @assignment_group.command(name="확인")
+    @assignment_group.command(name="확인")ㅍ
     async def show_assignment(self, ctx):
         """사용자가 '과제 확인' 명령어를 입력하면 실행되는 함수입니다. 모든 멤버의 과제를 출력합니다"""
         members = ctx.guild.members
@@ -46,7 +54,11 @@ class Assignment(commands.Cog):
                         data += f"- {assignment['과제명']}: {assignment['마감일']}까지\n"
                 else:
                     data += "- 과제 없음\n"
-        await ctx.send(data)
+        embed = discord.Embed(
+            description=data,
+            color=0x3498db
+        )
+        await ctx.send(embed=embed)
 
     @tasks.loop(hours=1)
     async def check_deadline(self, ctx):
