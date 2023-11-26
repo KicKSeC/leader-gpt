@@ -1,15 +1,17 @@
 ﻿import discord
-from discord.ext import commands, tasks 
+from discord.ext import commands, tasks
+
 
 class Schedule(commands.Cog):
     """
     팀원의 일정을 관리하는 커맨드에 대한 클래스
     """
+
     def __init__(self, bot):
         self.bot = bot
-        
+
         self.next_meeting = ""
-        
+
     @commands.group(name="회의시간")
     async def meeting(self, ctx):
         """사용자가 '회의시간' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다"""

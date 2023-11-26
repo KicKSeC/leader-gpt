@@ -1,16 +1,18 @@
 ﻿import discord
-import random 
-from discord.ext import commands, tasks 
+import random
+from discord.ext import commands, tasks
+
 
 class RoleDistribution(commands.Cog):
     """
     팀원 간의 역할 분배에 관한 커맨트에 대한 클래스
-    """ 
+    """
+
     def __init__(self, bot):
         self.bot = bot
-        
+
         self.role = {}
-            
+
     @commands.group(name="역할분담")
     async def role_dividing(self, ctx):
         """사용자가 '역할분담' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다."""
