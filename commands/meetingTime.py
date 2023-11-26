@@ -1,3 +1,5 @@
+# 아직 완성되지 않은 기능
+# 추후 디스코드 봇 명령어로 사용 가능하게 코드 수정이 필요
 from datetime import datetime
 
 inputTime = {}
