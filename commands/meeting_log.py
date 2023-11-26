@@ -1,4 +1,6 @@
 ﻿import logging
+
+import discord
 from discord.ext import commands
 from chatgpt import ChatGPT
 
@@ -24,23 +26,30 @@ class MeetingLog(commands.Cog):
     async def record(self, ctx):
         """디스코드간에 오가는 대화를 기록합니다."""
         if ctx.invoked_subcommand is None:
-            await ctx.send("기록 시작, 기록 종료, 기록 보이기")
+            embed = discord.Embed(
+                title="명령어 목록",
+                description="- 기록 시작\n"
+                            "- 기록 종료\n"
+                            "- 기록 보이기",
+                color=0x3498db
+            )
+            await ctx.send(embed=embed)
 
     @record.command(name="시작")
     async def start_record(self, ctx):
         """기록 시작"""
         if "기록" in self.record_names:
-            await ctx.send("이미 기록중입니다.")
+            await ctx.send(embed=discord.Embed(description="이미 기록중입니다", color=0x3498db))
             return
 
-        await ctx.send("기록 시작")
+        await ctx.send(embed=discord.Embed(description="기록 시작", color=0x3498db))
         self.record_names.append("기록")
         self.conversation["기록"] = []
 
     @record.command(name="종료")
     async def end_record(self, ctx):
         """기록 종료"""
-        await ctx.send("기록 종료")
+        await ctx.send(embed=discord.Embed(description="기록 종료", color=0x3498db))
         self.record_names.remove("기록")
 
     @record.command(name="보이기")
@@ -49,23 +58,23 @@ class MeetingLog(commands.Cog):
         result = "'기록'의 내용은\n"
         for message in self.conversation["기록"]:
             result += f"{message[0]}: {message[1]}\n"
-        await ctx.send(result)
+        await ctx.send(embed=discord.Embed(title="기록", description=result, color=0x3498db))
 
     @commands.command(name="회의록작성")
     async def create_meeting_log(self, ctx):
         """사용자가 '회의록작성' 명령어를 입력하면 실행되는 함수입니다. 회의록 작성을 시작합니다."""
         if not self.conversation["기록"]:
-            await ctx.send("기록된 회의가 없습니다. '!기록 시작'으로 회의를 기록하십시오.")
+            await ctx.send(embed=discord.Embed(description="기록된 회의가 없습니다. '!기록 시작'으로 회의를 기록하십시오.", color=0x3498db))
             return
 
-        await ctx.send("회의록 작성중...")
+        await ctx.send(embed=discord.Embed(title="회의록 작성중...", description="잠시만 기다려 주세요", color=0x3498db))
         prompt = PROMPT_CREATE_MEETING_LOG + "\n" + "\n".join(
             [f"{msg[0]}: {msg[1]}" for msg in self.conversation['기록']])
 
         meeting_log = ChatGPT.get_response(prompt)
 
         logging.info(meeting_log)
-        await ctx.send(meeting_log)
+        await ctx.send(embed=discord.Embed(title="회의록", description=meeting_log, color=0x3498db))
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
