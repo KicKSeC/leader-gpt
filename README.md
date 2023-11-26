@@ -14,3 +14,8 @@ class KeyData:
 필요한 데이터 목록
 - OPEN_API_KEY
 - DISCORD_TOKEN
+
+## 시작
+main.py를 실행하거나,
+`python main.py`,
+bot_start.bat 실행
