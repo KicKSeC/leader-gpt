@@ -37,7 +37,7 @@ class Assignment(commands.Cog):
             self.assignments[user].append({'과제명': content, '마감일': deadline})
         embed = discord.Embed(
             description="과제 부여 완료",
-            color=0x3498db
+            color=0x3498dba
         )
         await ctx.send(embed=embed)
 
