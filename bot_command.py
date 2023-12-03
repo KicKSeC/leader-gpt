@@ -1,7 +1,9 @@
 import logging  # 디버깅하기 위해
 import os
 import json
+from tracemalloc import start
 import discord
+import time
 import matplotlib.pyplot as plt
 from chatgpt import ChatGPT
 from discord.ext import commands
@@ -82,18 +84,23 @@ class LGPTCommand(commands.Cog):
     @commands.command(name="답변")
     async def answer(self, ctx, *, message):
         '''챗지피티 답변 생성'''
-        ans_txt = "" 
+        ans_txt = "답변: "
         msg = await ctx.send(ans_txt)
         stream = ChatGPT.get_response_by_stream(message)
         
+        # 매 입력마다 수정하기에는 부하가 크므로 2초에 한 번씩 메세지를 수정
+        start_time = time.time()
         while True:
             try:  
-                txt = next(stream) 
+                txt = next(stream)
                 ans_txt += txt
-                await msg.edit(content=ans_txt+"-")
-            except StopIteration: 
+            except StopIteration:       # 답변이 끝났는지 확인
                 break
-        msg.edit(content=ans_txt)
+            
+            if time.time() - start_time > 2:    # 메세지 수정으로부터 2초 지났는지 확인
+                start_time = time.time()
+                await msg.edit(content=ans_txt+"-")
+        await msg.edit(content=ans_txt)
 
 
     # 최종 구현여부가 정해지지 않은 기능
