@@ -6,18 +6,33 @@ from events import Events
 
 
 class EventsTest(TestCase):
-    def test_event(self):
-        events = Events() 
+    def append(self):
+        events = Events(load=False) 
 
-        events.push("회의 1", "2023-11-03", "프로젝트 일정 관리1")
-        events.push("회의 3", "2023-11-06", "프로젝트 일정 관리3")
-        events.push("회의 2", "2023-11-05", "프로젝트 일정 관리2")
-        events.push("회의 5", "2023-12-01", "프로젝트 일정 관리5")
-        events.push("회의 4", "2023-11-09", "프로젝트 일정 관리4")
+        events.push("2023-11-03 15", "회의 1", "프로젝트 일정 관리1")
+        events.push("2023-11-06 22", "회의 3", "프로젝트 일정 관리3")
+        events.push("2023-11-06 20", "회의 2", "프로젝트 일정 관리2")
+        events.push("2023-12-01 12", "회의 5", "프로젝트 일정 관리5")
+        events.push("2023-11-09 00", "회의 4", "프로젝트 일정 관리4")
+        
+        return events
+    def test_event(self):
+        events = self.append()
 
         print([x.name for x in events.get_events()])
         self.assertEqual(events.pop().name, "회의 1")
         self.assertEqual(events.pop().name, "회의 2")
+        self.assertEqual(events.pop().name, "회의 3")
+        self.assertEqual(events.pop().name, "회의 4")
+        self.assertEqual(events.pop().name, "회의 5")
+        self.assertEqual(events.heap, [])
+    
+    def test_event_delete(self):
+        events = self.append()
+        events.push("2023-11-06 21", "회의 2", "중간 프로젝트")
+        events.delete("회의 2")
+        
+        self.assertEqual(events.pop().name, "회의 1")
         self.assertEqual(events.pop().name, "회의 3")
         self.assertEqual(events.pop().name, "회의 4")
         self.assertEqual(events.pop().name, "회의 5")

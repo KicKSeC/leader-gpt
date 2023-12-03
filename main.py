@@ -3,7 +3,7 @@ import sys, os
 from data import KeyData
 from discord.ext import commands
 
-from bot_command import LGPTCommand
+from bot_command import LGPTCommand     # 이 클래스가 가장 먼저 임포트되어야 함.
 from commands.meeting_log import MeetingLog
 from commands.role_distribution import RoleDistribution
 from commands.schedule import Schedule
@@ -16,7 +16,6 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 bot = commands.Bot(command_prefix='!', intents=intents)
-
 
 @bot.event
 async def on_ready():
@@ -33,7 +32,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     if isinstance(error, commands.CommandNotFound):
-        await ctx.send("존재하지 않는 명령어입니다.")
+        await ctx.send("존재하지 않는 명령어입니다 -> !도움말")
 
 
 bot.run(KeyData.DISCORD_TOKEN)
