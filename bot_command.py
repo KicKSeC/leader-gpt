@@ -3,6 +3,7 @@ import os
 import json
 import discord
 import matplotlib.pyplot as plt
+from chatgpt import ChatGPT
 from discord.ext import commands
 
 def initial_setting():
@@ -15,11 +16,12 @@ def initial_setting():
             settings = {"channel": None, "members": []}
             json.dump(settings, f)
             
+    logging.basicConfig(filename='data\\bot.log', level=logging.DEBUG,  # 로그 파일 설정
+                        format='%(asctime)s:%(levelname)s:%(message)s')
+            
 initial_setting()
                 
     
-logging.basicConfig(filename='data\\bot_command.log', level=logging.DEBUG,  # 로그 파일 설정
-                    format='%(asctime)s:%(levelname)s:%(message)s')
 
 
 class LGPTCommand(commands.Cog):
@@ -29,7 +31,7 @@ class LGPTCommand(commands.Cog):
         봇, 다음 회의 시간, 평가, 역할, 규칙, 과제 등 여러 속성을 초기화합니다.
         """
         self.bot = bot
-        self.commands = ["도움말", "채널", "팀원평가", "평가", "회의시간", "역할분담",
+        self.commands = ["도움말", "채널", "답변", "팀원평가", "평가", "회의시간", "역할분담",
                          "회의록작성", "규칙", "과제", "그래프"]
 
     @commands.group(name="도움말")
@@ -37,10 +39,11 @@ class LGPTCommand(commands.Cog):
         """사용자가 '도움말' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다."""
         # 만약 서브 커맨드가 없다면, 사용 가능한 명령어 목록을 출력합니다.
         if ctx.invoked_subcommand is None:
+            description = '\n- '.join(self.commands)
+            description += "첫 실행이시라면 !채널 관련 명령어를 통해 초기 설정을 완료하여 주십시오"
             embed = discord.Embed(
                 title="명령어 목록",
-                description='\n- '.join(self.commands)
-                            "첫 실행이시라면 !채널 관련 명령어를 통해 초기 설정을 완료하여 주십시오",
+                description=description,
                 color=0x3498db  # 임베드 색상 설정
             )
             await ctx.send(embed=embed)
@@ -62,7 +65,7 @@ class LGPTCommand(commands.Cog):
     async def set_channel(self, ctx):
         '''현재 채널로 채널 설정 저장'''
         channel = ctx.channel.id
-        logging.info(channel)
+        
         with open("data\\settings.json", "r", encoding='utf-8') as f:
             src_settings = json.load(f)         # 설정 파일 불러옴
             src_settings['channel'] = channel   # 현재 채널로 변경
@@ -75,6 +78,23 @@ class LGPTCommand(commands.Cog):
                 color=0x3498db  # 임베드 색상 설정
             )
         await ctx.send(embed=embed)
+    
+    @commands.command(name="답변")
+    async def answer(self, ctx, *, message):
+        '''챗지피티 답변 생성'''
+        ans_txt = "" 
+        msg = await ctx.send(ans_txt)
+        stream = ChatGPT.get_response_by_stream(message)
+        
+        while True:
+            try:  
+                txt = next(stream) 
+                ans_txt += txt
+                await msg.edit(content=ans_txt+"-")
+            except StopIteration: 
+                break
+        msg.edit(content=ans_txt)
+
 
     # 최종 구현여부가 정해지지 않은 기능
     @commands.command(name="그래프")

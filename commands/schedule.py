@@ -6,8 +6,6 @@ from datetime import datetime
 from discord.ext import commands, tasks
 from events import Event, Events
 
-logging.basicConfig(filename='bot_command.log', level=logging.INFO,  # 로그 파일 설정
-                    format='%(asctime)s:%(levelname)s:%(message)s')
 
 class Schedule(commands.Cog):
     """

@@ -4,9 +4,6 @@ import discord
 from discord.ext import commands
 from chatgpt import ChatGPT
 
-logging.basicConfig(filename='bot_command.log', level=logging.INFO,  # 로그 파일 설정
-                    format='%(asctime)s:%(levelname)s:%(message)s')
-
 PROMPT_CREATE_MEETING_LOG = "서기로서, 아래 나열되는 회의 대화를 요약, 정리, 나열해서 회의록을 작성해"
 
 
