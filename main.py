@@ -1,6 +1,5 @@
 import discord
 import sys, os
-from data import KeyData
 from discord.ext import commands
 
 from settings import Settings   # 이 클래스가 가장 먼저 임포트되어야 함
@@ -30,7 +29,7 @@ async def on_ready():
     await bot.add_cog(TeamRule(bot))
     await bot.add_cog(GroupReview(bot))
     await bot.add_cog(Assignment(bot))
-    print(bot.user.name) 
+    print(bot.user.name)        # type: ignore
 
 
 @bot.event

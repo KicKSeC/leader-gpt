@@ -1,5 +1,4 @@
 ﻿import discord
-import time
 from discord.ext import commands
 from chatgpt import ChatGPT
 
@@ -33,21 +32,16 @@ class TeamRule(commands.Cog):
             await ctx.send(embed=discord.Embed(description="ChatGPT를 통해 규칙생성", color=0x3498db))
             
             rules = "규칙\n"
-            msg = await ctx.send(ans_txt)
+            msg = await ctx.send(rules)
             stream = ChatGPT.get_response_by_stream(PROMPT_CREATE_RULE)
             
-            # 매 입력마다 수정하기에는 부하가 크므로 2초에 한 번씩 메세지를 수정
-            start_time = time.time()
             while True:
-                try:  
-                    txt = next(stream)
-                    rules += txt
+                try:
+                    rules = next(stream)
                 except StopIteration:       # 답변이 끝났는지 확인
                     break
                 
-                if time.time() - start_time > 2:    # 메세지 수정으로부터 2초 지났는지 확인
-                    start_time = time.time()
-                    await msg.edit(content=rules+"-")
+                await msg.edit(content=rules+"-")
             await msg.edit(content=rules)
          
             await ctx.send(embed=discord.Embed(description=rules, color=0x3498db))

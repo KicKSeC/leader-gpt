@@ -1,12 +1,8 @@
-﻿from operator import le
-import os, sys
-from re import DEBUG
+﻿import os, sys
 import logging 
 
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from data import KeyData
-from chatgpt import ChatGPT
-from openai import OpenAI
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__)))) 
+from chatgpt import ChatGPT 
 
 
 logging.basicConfig(filename='test\\test.log', level=logging.DEBUG,
@@ -20,8 +16,7 @@ while True:
     try: 
         logging.info('answering...')
         txt = next(stream)
-        print(txt)
-        ans_txt += txt
+        print(txt) 
     except StopIteration:
         logging.info("end answer")
         break

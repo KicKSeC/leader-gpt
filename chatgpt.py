@@ -1,6 +1,7 @@
 ﻿import logging 
+import time
+from openai import OpenAI 
 from settings import Settings
-from openai import OpenAI
 
 
 class ChatGPT:
@@ -69,9 +70,16 @@ class ChatGPT:
                 ], 
                 stream=True
             )
+            answer = ""
+            start_time = time.time()
             for chunk in stream:    # type: ignore
                 if chunk.choices[0].delta.content is not None:
-                    yield chunk.choices[0].delta.content
+                    answer += chunk.choices[0].delta.content
+                    
+                    if time.time() - start_time > 1:    # 특정 시간마다 답변을 반환
+                        yield answer
+            yield answer
+            
         finally:
             ChatGPT.is_answering = False
         

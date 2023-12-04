@@ -1,5 +1,4 @@
-﻿import json
-import discord
+﻿import discord
 from discord.ext import commands
 from settings import Settings
 
@@ -13,10 +12,10 @@ class UserSettings(commands.Cog):
         '''채널과 관련된 명령어 그룹'''
         # 만약 서브 커맨드가 없다면, 사용 가능한 명령어 목록을 출력합니다.
         if ctx.invoked_subcommand is None:
-            commands = ["현재채널"]
+            available_commands = ["현재채널"]
             embed = discord.Embed(
                 title="명령어 목록",
-                description='\n- !설정 '.join(commands),
+                description='\n- !설정 '.join(available_commands),
                 color=0x3498db  # 임베드 색상 설정
             )
             await ctx.send(embed=embed)

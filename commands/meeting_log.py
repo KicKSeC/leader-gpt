@@ -1,6 +1,4 @@
 ﻿import logging
-import time
-
 import discord
 from discord.ext import commands
 from chatgpt import ChatGPT
@@ -73,20 +71,15 @@ class MeetingLog(commands.Cog):
         msg = await ctx.send(embed=meeting_log)
         stream = ChatGPT.get_response_by_stream(prompt)
         
-        # 매 입력마다 수정하기에는 부하가 크므로 특정 시간마다 한 번씩 메세지를 수정
-        start_time = time.time()
         while True:
-            try:  
-                txt = next(stream)
-                ans_txt += txt
+            try:
+                ans_txt = next(stream)
             except StopIteration:       # 답변이 끝났는지 확인
                 break
             
-            if time.time() - start_time > 1:    # 메세지 수정으로부터 시간이 지났는지 확인
-                start_time = time.time()
-                meeting_log.description = ans_txt+'-'
-                await msg.edit(embed=meeting_log)
-        logging.info(ans_txt)
+            meeting_log.description = ans_txt+'-'
+            await msg.edit(embed=meeting_log)
+        logging.info("회의록: %s", ans_txt)
         meeting_log.description = ans_txt
         await msg.edit(embed=meeting_log) 
 

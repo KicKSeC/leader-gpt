@@ -6,9 +6,6 @@ import logging
 class Settings:
     '''사용자로부터 입력에 필요한 데이터를 입력받는 클래스'''
     path = os.path.join("data", "settings.json")
-
-    def __init__(self):
-        pass
     
     @classmethod
     def initial_setting(cls):
@@ -52,4 +49,15 @@ class Settings:
         
         return data
     
+    @classmethod
+    def delete(cls, key:str):
+        '''주어진 키의 값을 삭제. 성공하면 True, 실패하면 False'''
+        with open(cls.path, 'r', encoding='utf-8') as f:
+            content = json.load(f)
+        if content.get(key) is None:
+            return False
+        del content[key]
+        with open(cls.path, 'w', encoding='utf-8') as f:
+            json.dump(content, f, indent=4)
+
 Settings.initial_setting()
