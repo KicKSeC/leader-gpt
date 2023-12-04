@@ -1,11 +1,9 @@
 ﻿import logging
-import json
-import os
 import discord
 from datetime import datetime  
 from discord.ext import commands, tasks
 from events import Event, Events
-
+from settings import Settings
 
 class Schedule(commands.Cog):
     """
@@ -18,16 +16,6 @@ class Schedule(commands.Cog):
         self.events = Events() 
         
         self.check_schedule_launcher.start()        # 에러가 뜨지만 잘 작동함
-
-    def read_channel(self):
-        '''data/setting.json으로부터 채널 정보를 불러옴'''
-        current_dir = os.path.join(os.path.dirname(__file__)) # /commands
-        parent_dir = os.path.join(os.path.dirname(current_dir)) # /
-        path = os.path.join(parent_dir, "data", "settings.json") # /data/settings.json
-        with open(path, 'r', encoding='utf-8') as f:
-            channel = json.load(f)['channel']
-         
-        return channel
         
     @commands.group(name="일정")
     async def schedule(self, ctx):
@@ -136,6 +124,7 @@ class Schedule(commands.Cog):
         
     @schedule.command(name="확인")
     async def show_schedule(self, ctx):
+        '''일정을 나열하는 커팬드'''        # TODO 출력 디자인 개선 
         events = self.events.get_events()
         description = "날짜:이름:내용:할당\n"
         for event in events:
@@ -172,7 +161,7 @@ class Schedule(commands.Cog):
         """하루의 매 시간, 즉 분침이 0일 때 일정을 확인하기 위해 분침이 0일 때 실행하고 종료"""
         now = datetime.now()  
         if now.minute == 0:
-            self.check_schedule.start()  
+            self.check_schedule.start() 
             self.check_schedule_launcher.stop()
     
     @tasks.loop(minutes=60)
@@ -193,10 +182,13 @@ class Schedule(commands.Cog):
                     description=description,
                     color=0x3498db
                 )
-                channel = self.bot.get_channel(self.read_channel())
+                
+                channel = self.bot.get_channel(Settings.load('channel'))
                 if not channel is None:        # TODO 채널이 할당되지 않았다면 출력하지 못함...
                     await channel.send(embed=embed)
 
                 event = self.events.pop() # 지난 일정 삭제 
             else: 
                 break 
+        
+    

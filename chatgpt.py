@@ -1,5 +1,5 @@
-﻿import logging
-from data import KeyData
+﻿import logging 
+from settings import Settings
 from openai import OpenAI
 
 
@@ -10,7 +10,7 @@ class ChatGPT:
     system_role_prompt = "You are a supportive team leader and enabler of your teammates' goals."
     is_answering = False
     token_usage = 0  # 사용된 총 토큰 수
-    __client = OpenAI(api_key=KeyData.OPENAI_API_KEY)
+    __client = OpenAI(api_key=Settings.load('OPENAI_API_KEY'))
 
     class AlreadyAnsweringError(Exception):
         """ChatGPT는 한번에 하나만 답변 가능하므로 이미 답변 중일 때 발생하는 에러"""

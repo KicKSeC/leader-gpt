@@ -1,4 +1,5 @@
 ﻿import logging
+import time
 
 import discord
 from discord.ext import commands
@@ -64,14 +65,30 @@ class MeetingLog(commands.Cog):
             await ctx.send(embed=discord.Embed(description="기록된 회의가 없습니다. '!기록 시작'으로 회의를 기록하십시오.", color=0x3498db))
             return
 
-        await ctx.send(embed=discord.Embed(title="회의록 작성중...", description="잠시만 기다려 주세요", color=0x3498db))
         prompt = PROMPT_CREATE_MEETING_LOG + "\n" + "\n".join(
             [f"{msg[0]}: {msg[1]}" for msg in self.conversation['기록']])
 
-        meeting_log = ChatGPT.get_response(prompt)
-
-        logging.info(meeting_log)
-        await ctx.send(embed=discord.Embed(title="회의록", description=meeting_log, color=0x3498db))
+        ans_txt = "결과:"
+        meeting_log = discord.Embed(title="회의록", description=ans_txt, color=0x3498db)
+        msg = await ctx.send(embed=meeting_log)
+        stream = ChatGPT.get_response_by_stream(prompt)
+        
+        # 매 입력마다 수정하기에는 부하가 크므로 특정 시간마다 한 번씩 메세지를 수정
+        start_time = time.time()
+        while True:
+            try:  
+                txt = next(stream)
+                ans_txt += txt
+            except StopIteration:       # 답변이 끝났는지 확인
+                break
+            
+            if time.time() - start_time > 1:    # 메세지 수정으로부터 시간이 지났는지 확인
+                start_time = time.time()
+                meeting_log.description = ans_txt+'-'
+                await msg.edit(embed=meeting_log)
+        logging.info(ans_txt)
+        meeting_log.description = ans_txt
+        await msg.edit(embed=meeting_log) 
 
     @commands.Cog.listener()
     async def on_message(self, ctx):

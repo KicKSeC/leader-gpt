@@ -1,5 +1,6 @@
 ﻿import discord
-from discord.ext import commands, tasks
+import time
+from discord.ext import commands
 from chatgpt import ChatGPT
 
 # TODO 더 나은 팀 규칙 생성 프롬프트 작성
@@ -30,7 +31,25 @@ class TeamRule(commands.Cog):
         """사용자가 '규칙 생성' 명령어를 입력하면 실행되는 함수입니다. 규칙을 생성합니다."""
         if not ChatGPT.is_answering:  # 챗지피티가 이미 사용되고 있지는 않은지 확인
             await ctx.send(embed=discord.Embed(description="ChatGPT를 통해 규칙생성", color=0x3498db))
-            rules = ChatGPT.get_response(message=PROMPT_CREATE_RULE)
+            
+            rules = "규칙\n"
+            msg = await ctx.send(ans_txt)
+            stream = ChatGPT.get_response_by_stream(PROMPT_CREATE_RULE)
+            
+            # 매 입력마다 수정하기에는 부하가 크므로 2초에 한 번씩 메세지를 수정
+            start_time = time.time()
+            while True:
+                try:  
+                    txt = next(stream)
+                    rules += txt
+                except StopIteration:       # 답변이 끝났는지 확인
+                    break
+                
+                if time.time() - start_time > 2:    # 메세지 수정으로부터 2초 지났는지 확인
+                    start_time = time.time()
+                    await msg.edit(content=rules+"-")
+            await msg.edit(content=rules)
+         
             await ctx.send(embed=discord.Embed(description=rules, color=0x3498db))
 
             # 나열된 규칙을 개별적으로 나누어 (빈 거 제외하고) 각각 저장

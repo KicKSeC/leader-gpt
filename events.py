@@ -29,6 +29,8 @@ class Event:
         
 class Events:
     '''이벤트들을 딕셔너리와 힙을 사용해 관리하는 클래스'''
+    path = 'data\\events.csv'
+    
     def __init__(self, load=True):  # load: events.csv에서 스케줄을 읽어들일 것인지 여부
         self.heap = []
         self.dict = {}
@@ -91,7 +93,7 @@ class Events:
         '''이벤트들을 정렬하여 csv 파일로 저장'''
         events = self.get_events()
         
-        with open('events.csv', 'w', encoding='utf-8', newline='') as f:
+        with open(Events.path, 'w', encoding='utf-8', newline='') as f:
             wr = csv.writer(f)
             for event in events:
                 wr.writerow([event.date.strftime("%Y-%m-%d %H"), event.name, event.content, event.assigned])
@@ -103,7 +105,7 @@ class Events:
         self.heap = []
         
         try:
-            with open('events.csv', 'r', encoding='utf-8') as f:
+            with open(Events.path, 'r', encoding='utf-8') as f:
                 rdr = csv.reader(f) 
                 for line in rdr:
                     date = datetime.strptime(line[0], "%Y-%m-%d %H")
