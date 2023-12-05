@@ -20,7 +20,7 @@ class LGPTCommand(commands.Cog):
         # 만약 서브 커맨드가 없다면, 사용 가능한 명령어 목록을 출력합니다.
         if ctx.invoked_subcommand is None:
             description = '\n- '.join(self.commands)
-            description += "첫 실행이시라면 !채널 관련 명령어를 통해 초기 설정을 완료하여 주십시오"
+            description += "첫 실행이시라면 !설정 관련 명령어를 통해 초기 설정을 완료하여 주십시오"
             embed = discord.Embed(
                 title="명령어 목록",
                 description=description,
