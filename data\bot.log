@@ -1,0 +1,10 @@
+2023-12-08 01:44:13,431:DEBUG:CACHEDIR=/Users/benkang/.matplotlib
+2023-12-08 01:44:13,433:DEBUG:Using fontManager instance from /Users/benkang/.matplotlib/fontlist-v330.json
+2023-12-08 01:44:13,807:DEBUG:load_ssl_context verify=True cert=None trust_env=True http2=False
+2023-12-08 01:44:13,807:DEBUG:load_verify_locations cafile='/Library/Frameworks/Python.framework/Versions/3.11/lib/python3.11/site-packages/certifi/cacert.pem'
+2023-12-08 01:44:13,819:WARNING:PyNaCl is not installed, voice will NOT be supported
+2023-12-08 01:44:13,819:DEBUG:on_ready has successfully been registered as an event
+2023-12-08 01:44:13,819:DEBUG:on_command_error has successfully been registered as an event
+2023-12-08 01:44:13,820:DEBUG:Using selector: KqueueSelector
+2023-12-08 01:44:13,820:INFO:logging in using static token
+2023-12-08 01:44:15,465:INFO:Shard ID None has connected to Gateway (Session ID: baef939603f0e2d0a87b914ed389515d).
