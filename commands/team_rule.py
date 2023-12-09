@@ -42,7 +42,7 @@ class TeamRule(commands.Cog):
                     break
                 
                 await msg.edit(content=rules+"-")
-            await msg.edit(content=rules)
+            await msg.edit(content="")
          
             await ctx.send(embed=discord.Embed(description=rules, color=0x3498db))
 

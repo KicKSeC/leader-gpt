@@ -11,8 +11,8 @@ class LGPTCommand(commands.Cog):
         봇, 다음 회의 시간, 평가, 역할, 규칙, 과제 등 여러 속성을 초기화합니다.
         """
         self.bot = bot
-        self.commands = ["도움말", "설정", "답변", "팀원평가", "평가", "회의시간", "역할분담",
-                         "회의록작성", "규칙", "과제", "그래프", "일정"]
+        self.commands = ["도움말", "설정", "답변", "규칙", "평가", "팀원평가", "회의시간", "역할분담",
+                          "기록", "회의록작성", "이메일", "과제", "그래프", "일정"]
 
     @commands.group(name="도움말")
     async def help(self, ctx: discord.ext.commands.Context):
@@ -20,7 +20,7 @@ class LGPTCommand(commands.Cog):
         # 만약 서브 커맨드가 없다면, 사용 가능한 명령어 목록을 출력합니다.
         if ctx.invoked_subcommand is None:
             description = '\n- '.join(self.commands)
-            description += "첫 실행이시라면 !채널 관련 명령어를 통해 초기 설정을 완료하여 주십시오"
+            description += "\n첫 실행이시라면 !설정 관련 명령어를 통해 초기 설정을 완료하여 주십시오"
             embed = discord.Embed(
                 title="명령어 목록",
                 description=description,
