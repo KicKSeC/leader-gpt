@@ -1,5 +1,5 @@
 ﻿import discord
-import datetime
+from datetime import datetime
 from discord.ext import commands, tasks
 
 
@@ -30,15 +30,31 @@ class Assignment(commands.Cog):
     @assignment_group.command(name="부여")
     async def assign_assignment(self, ctx, content, deadline):
         """사용자가 '과제 부여' 명령어를 입력하면 실행되는 함수입니다. 과제를 부여하고, 부여 완료를 알립니다."""
-        user = ctx.author.name  # 명령어를 입력한 사용자의 이름을 가져옵니다
-        if user not in self.assignments:  # 이 사용자에게 처음으로 과제를 부여하는 경우, 새로운 과제 리스트를 생성합니다.
+        user = ctx.author.name
+
+        # 입력 유효성 검사 - 과제 내용이 비어 있는지 확인
+        if not content:
+            await ctx.send("올바른 과제 내용을 입력해주세요.")
+            return
+
+        # 입력 유효성 검사 - 날짜 형식이 올바른지 확인
+        try:
+            deadline_date = datetime.strptime(deadline, "%Y-%m-%d")
+        except ValueError:
+            await ctx.send("올바른 날짜 형식(YYYY-MM-DD)으로 입력해주세요.")
+            return
+
+        # 유효성 검사 통과시 과제 부여
+        if user not in self.assignments:
             self.assignments[user] = [{'과제명': content, '마감일': deadline}]
-        else:  # 이 사용자에게 이미 과제가 부여된 경우, 과제 리스트에 새로운 과제를 추가합니다.
+        else:
             self.assignments[user].append({'과제명': content, '마감일': deadline})
+
         embed = discord.Embed(
             description="과제 부여 완료",
-            color=0x3498dba
+            color=0x3498db
         )
+        print(self.assignments)
         await ctx.send(embed=embed)
 
     @assignment_group.command(name="확인")
@@ -60,9 +76,23 @@ class Assignment(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @tasks.loop(hours=1)
-    async def check_deadline(self, ctx):
-        """과제의 마감 시간을 확인하는 함수입니다"""
-        now = datetime.datetime.now()
-        for ass in self.assignments:  # 부여된 모든 과제를 순회합니다.
-            pass  # 여기에 마감 시간을 확인하고 알림을 보내는 코드를 추가할 수 있습니다.
+    @tasks.loop(minutes=1)  # 1분 주기로 반복
+    async def check_deadlines(self):
+        print("과제 검사")
+        now = datetime.now().date()
+        for guild in self.bot.guilds:  # 봇이 속한 모든 서버에 대해 반복
+            for user, assignments in self.assignments.items():
+                for assignment in assignments:
+                    deadline = assignment['마감일']
+                    time_left = (deadline - now).days
+                    if time_left == 1:
+                        user_id = int(user.split('#')[1])
+                        user_object = self.bot.get_user(user_id)
+                        if user_object:
+                            await user_object.send(f"과제 '{assignment['과제명']}'의 마감이 1일 남았습니다!")
+                        else:
+                            # 사용자가 DM을 허용하지 않는 경우 서버의 기본 채널에 메시지를 보냄
+                            default_channel = guild.system_channel
+                            if default_channel:
+                                await default_channel.send(f"과제 '{assignment['과제명']}'의 마감이 1일 남았습니다!")
+
