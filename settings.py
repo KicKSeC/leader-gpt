@@ -18,7 +18,7 @@ class Settings:
                 settings = {"channel": None, "members": []}
                 json.dump(settings, f)
 
-        logging.basicConfig(filename='data\\bot.log', level=logging.DEBUG,  # 로그 파일 설정
+        logging.basicConfig(filename='data/bot.log', level=logging.DEBUG,  # 로그 파일 설정
                             format='%(asctime)s:%(levelname)s:%(message)s')
 
         if Settings.load('OPENAI_API_KEY') is None:
