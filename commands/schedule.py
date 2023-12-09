@@ -20,7 +20,7 @@ class Schedule(commands.Cog):
 
     @commands.group(name="일정")
     async def schedule(self, ctx):
-        '''사용자가 '일정' 명령어를 서브 커맨드 없이 입력하는 경우의 함수'''
+        """사용자가 '일정' 명령어를 서브 커맨드 없이 입력하는 경우의 함수"""
 
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(
@@ -35,7 +35,7 @@ class Schedule(commands.Cog):
 
     @schedule.command(name="추가")
     async def add_schedule(self, ctx):
-        '''새 일정을 추가함'''
+        """새 일정을 추가함"""
 
         def parse_schedule_input(input_string: str):
             try:
@@ -82,7 +82,7 @@ class Schedule(commands.Cog):
 
     @schedule.command(name="삭제")
     async def delete_schedule(self, ctx):
-        '''입력된 이름의 일정을 삭제함'''
+        """입력된 이름의 일정을 삭제함"""
 
         def parse_schedule_input(input_string: str):
             try:
@@ -127,7 +127,7 @@ class Schedule(commands.Cog):
 
     @schedule.command(name="확인")
     async def show_schedule(self, ctx):
-        '''일정을 나열하는 커팬드'''  # TODO 출력 디자인 개선
+        """일정을 나열하는 커팬드"""  # TODO 출력 디자인 개선
         events = self.events.get_events()
         description = "날짜:이름:내용:할당\n"
         for event in events:
@@ -170,7 +170,7 @@ class Schedule(commands.Cog):
     @tasks.loop(minutes=60)
     # @tasks.loop(minutes=1)
     async def check_schedule(self):
-        '''일정이 지났는지 확인하여 지난 일정을 채널에 표시'''
+        """일정이 지났는지 확인하여 지난 일정을 채널에 표시"""
         now = datetime.now()
 
         # 현재 시간을 기준으로 일정이 지난 리스트들을 확인하고 삭제
