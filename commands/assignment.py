@@ -54,6 +54,7 @@ class Assignment(commands.Cog):
             description="과제 부여 완료",
             color=0x3498db
         )
+        print(self.assignments)
         await ctx.send(embed=embed)
 
     @assignment_group.command(name="확인")
@@ -74,3 +75,24 @@ class Assignment(commands.Cog):
             color=0x3498db
         )
         await ctx.send(embed=embed)
+
+    @tasks.loop(minutes=1)  # 1분 주기로 반복
+    async def check_deadlines(self):
+        print("과제 검사")
+        now = datetime.now().date()
+        for guild in self.bot.guilds:  # 봇이 속한 모든 서버에 대해 반복
+            for user, assignments in self.assignments.items():
+                for assignment in assignments:
+                    deadline = assignment['마감일']
+                    time_left = (deadline - now).days
+                    if time_left == 1:
+                        user_id = int(user.split('#')[1])
+                        user_object = self.bot.get_user(user_id)
+                        if user_object:
+                            await user_object.send(f"과제 '{assignment['과제명']}'의 마감이 1일 남았습니다!")
+                        else:
+                            # 사용자가 DM을 허용하지 않는 경우 서버의 기본 채널에 메시지를 보냄
+                            default_channel = guild.system_channel
+                            if default_channel:
+                                await default_channel.send(f"과제 '{assignment['과제명']}'의 마감이 1일 남았습니다!")
+

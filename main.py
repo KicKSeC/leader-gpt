@@ -29,6 +29,8 @@ async def on_ready():
     await bot.add_cog(TeamRule(bot))
     await bot.add_cog(GroupReview(bot))
     await bot.add_cog(Assignment(bot))
+    assignment_cog = Assignment(bot)
+    assignment_cog.check_deadlines.start()  # check_deadlines 태스크 시작
     print(bot.user.name)        # type: ignore
 
 
