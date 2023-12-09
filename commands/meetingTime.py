@@ -16,7 +16,7 @@ class MeetingTime(commands.Cog):
         #최종 회의시간을 저장할 딕셔너리
         self.meetingTime = {}
 
-    
+     
 
     #멤버리스트 현황 확인용 - 추후 삭제(일반 사용자가 이용 X 개발자 확인용)
     @commands.command("멤버리스트")
@@ -41,7 +41,7 @@ class MeetingTime(commands.Cog):
             self.memberList[display_name][date] = []
 
         self.memberList[display_name][date].append(time)
-    
+        await ctx.send(f"새로운 시간 {date} {time}이 입력되었습니다.")
 
     #시간입력 팀원이름 날짜 시간 - 팀원이름을 함께 입력하여 입력한 팀원이름(key)에 입력한 날짜, 시간을 저장
     @commands.command("팀원시간입력")
@@ -56,13 +56,23 @@ class MeetingTime(commands.Cog):
             self.memberList[member_name][date] = []
 
         self.memberList[member_name][date].append(time)
+        await ctx.send(f"새로운 시간 {date} {time}이 입력되었습니다.")
         
     
     #전체 목록을 보여줌. (출력 형식 수정해야함)
     @commands.command(name='전체목록')
     async def print_dict(self, ctx):
-        await ctx.send(f"전체 목록: {self.memberList}")
+        # 팀원 목록 출력
+        member_names = ', '.join(self.memberList.keys())
+        await ctx.send(f"현재 팀원 목록: {member_names}")
 
+        # 팀원별 시간 출력
+        result_message = "팀원별 시간:\n"
+        for member, schedules in self.memberList.items():
+            formatted_schedules = [f"{date}: {', '.join(times)}" for date, times in schedules.items()]
+            result_message += f"{member}: {', '.join(formatted_schedules)}\n"
+
+        await ctx.send(result_message)
     #현재 저장된 팀원의 목록을 확인
     @commands.command(name="팀원목록")
     async def member_list(self, ctx):
