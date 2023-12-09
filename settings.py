@@ -6,7 +6,7 @@ import logging
 class Settings:
     """사용자로부터 입력에 필요한 데이터를 입력받는 클래스"""
     path_setting = os.path.join("data", "settings.json")
-    path_events = os.path.join("data", "events.json")
+    path_data = os.path.join("data", "events.json")
 
     @classmethod
     def initial_setting(cls):
@@ -18,10 +18,10 @@ class Settings:
             with open(cls.path_setting, "w", encoding='utf-8') as f:
                 settings = {"channel": None, "members": []}
                 json.dump(settings, f)
-        if not os.path.isfile(cls.path_events):
-            with open(cls.path_events, "w", encoding='utf-8') as f:
-                events = {"assignment": {}, "schedule": []}
-                json.dump(events, f)
+        if not os.path.isfile(cls.path_data):
+            with open(cls.path_data, "w", encoding='utf-8') as f:
+                data = {"assignment": {}, "schedule": []}
+                json.dump(data, f)
 
         logging.basicConfig(filename='data/bot.log', level=logging.DEBUG,  # 로그 파일 설정
                             format='%(asctime)s:%(levelname)s:%(message)s')
