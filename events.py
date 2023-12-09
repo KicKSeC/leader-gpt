@@ -28,7 +28,7 @@ class Event:
 
         
 class Events:
-    '''이벤트들을 딕셔너리와 힙을 사용해 관리하는 클래스'''
+    """이벤트들을 딕셔너리와 힙을 사용해 관리하는 클래스"""
     path = 'data\\events.csv'
     
     def __init__(self, load=True):  # load: events.csv에서 스케줄을 읽어들일 것인지 여부

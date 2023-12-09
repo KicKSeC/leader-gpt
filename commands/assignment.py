@@ -16,7 +16,8 @@ class Assignment(commands.Cog):
         print(self.path)
         try:
             with open(self.path, 'r') as f:
-                self.assignments = json.load(f).get("assignment")
+                content = json.load(f)
+                self.assignments = content.get("assignment", {})
         except FileNotFoundError:
             self.assignments = {}
 
@@ -26,7 +27,7 @@ class Assignment(commands.Cog):
             content = json.load(f)
         content['assignment'] = self.assignments
         with open(self.path, 'w', encoding='utf-8') as f:
-            json.dump(content, f, indent=4)
+            json.dump(content, f, indent=4, ensure_ascii=False)
 
     @commands.group(name="과제")
     async def assignment_group(self, ctx):
