@@ -74,9 +74,11 @@ class ChatGPT:
             start_time = time.time()
             for chunk in stream:    # type: ignore
                 if chunk.choices[0].delta.content is not None:
-                    answer += chunk.choices[0].delta.content
+                    delta = chunk.choices[0].delta.content
+                    answer += delta
                     
                     if time.time() - start_time > 1:    # 특정 시간마다 답변을 반환
+                        start_time = time.time()
                         yield answer
             yield answer
             
