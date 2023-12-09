@@ -1,8 +1,8 @@
-﻿import os, sys
-import logging 
-
-sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__)))) 
+﻿import logging
+import os
+import sys
 from chatgpt import ChatGPT 
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
 
 logging.basicConfig(filename='test\\test.log', level=logging.DEBUG,
