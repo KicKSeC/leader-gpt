@@ -12,7 +12,7 @@ class Assignment(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.path = os.path.join("data", "events.json")
+        self.path = os.path.join("data", "data.json")
         print(self.path)
         try:
             with open(self.path, 'r') as f:

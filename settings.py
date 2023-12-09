@@ -6,7 +6,7 @@ import logging
 class Settings:
     """사용자로부터 입력에 필요한 데이터를 입력받는 클래스"""
     path_setting = os.path.join("data", "settings.json")
-    path_data = os.path.join("data", "events.json")
+    path_data = os.path.join("data", "data.json")
 
     @classmethod
     def initial_setting(cls):
