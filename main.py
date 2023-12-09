@@ -11,7 +11,7 @@ from commands.schedule import Schedule
 from commands.team_rule import TeamRule
 from commands.group_review import GroupReview
 from commands.assignment import Assignment
-
+from commands.meetingTime import MeetingTime
 sys.path.append(os.path.dirname(__file__))
 intents = discord.Intents.default()
 intents.message_content = True
@@ -28,6 +28,7 @@ async def on_ready():
     await bot.add_cog(RoleDistribution(bot))
     await bot.add_cog(TeamRule(bot))
     await bot.add_cog(GroupReview(bot))
+    await bot.add_cog(MeetingTime(bot))
     assignment_cog = Assignment(bot)
     await bot.add_cog(assignment_cog)
     assignment_cog.check_deadlines.start()  # check_deadlines 태스크 시작
