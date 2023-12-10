@@ -31,7 +31,7 @@ async def on_ready():
     await bot.add_cog(MeetingTime(bot))
     assignment_cog = Assignment(bot)
     await bot.add_cog(assignment_cog)
-    assignment_cog.check_deadlines.start()  # check_deadlines 태스크 시작
+    assignment_cog.check_deadlines.start()  # check_deadlines 시작 - 시연이후 삭제될 코드
     print(bot.user.name)        # type: ignore
 
 

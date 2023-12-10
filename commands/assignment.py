@@ -12,28 +12,42 @@ class Assignment(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.path = os.path.join("data", "data.json")
-        print(self.path)
+        self.path_data = os.path.join("data", "data.json")  # 과제 데이터 파일 경로 설정
+        self.path_setting = os.path.join("data", "settings.json")  # 채널 ID 저장되어 있는 파일 경로 설정
+        self.channel_id = None
         try:
-            with open(self.path, 'r') as f:
+            with open(self.path_data, 'r') as f:
                 content = json.load(f)
-                self.assignments = content.get("assignment", {})
+                self.assignments = content.get("assignment", {})  # 데이터 로드, 없으면 빈 딕셔너리 생성
         except FileNotFoundError:
             self.assignments = {}
 
+    def upadate_channel(self):
+        print("채널 id 업데이트")
+        try:
+            with open(self.path_setting, 'r') as f:
+                content = json.load(f)
+                print(content)
+                self.channel_id = content.get("channel")
+                print(self.channel_id)
+        except FileNotFoundError:
+            print("파일 없음")
+            self.channel_id = None
+
     def save_assignments(self):
+        """과제 데이터를 파일에 저장"""
         print("과제 갱신")
-        with open(self.path, 'r', encoding='utf-8') as f:
+        with open(self.path_data, 'r', encoding='utf-8') as f:
             content = json.load(f)
         content['assignment'] = self.assignments
-        with open(self.path, 'w', encoding='utf-8') as f:
+        with open(self.path_data, 'w', encoding='utf-8') as f:
             json.dump(content, f, indent=4, ensure_ascii=False)
 
     @commands.group(name="과제")
     async def assignment_group(self, ctx):
-        """사용자가 '과제' 명령어를 입력하면, 서브 커맨드가 없는 경우에 실행되는 함수입니다"""
-        # 만약 서브 커맨드가 없다면, 추가 명령어를 입력하도록 안내합니다
+        """'과제' 명령어 처리 함수"""
         if ctx.invoked_subcommand is None:
+            # 서브 명령어가 없을 때 안내하는 Embed 메시지 출력
             embed = discord.Embed(
                 title="추가 명령어를 입력해주세요",
                 description="- 부여\n"
@@ -45,19 +59,37 @@ class Assignment(commands.Cog):
 
     @assignment_group.command(name="부여")
     async def assign_assignment(self, ctx, content, deadline):
-        """사용자가 '과제 부여' 명령어를 입력하면 실행되는 함수입니다. 과제를 부여하고, 부여 완료를 알립니다."""
-        user = ctx.author.name
+        """'과제 부여' 명령어 처리 함수"""
+        user = ctx.author.display_name
 
-        # 입력 유효성 검사 - 과제 내용이 비어 있는지 확인
+        # 입력 유효성 검사
         if not content:
-            await ctx.send("올바른 과제 내용을 입력해주세요.")
+            # 과제 내용이 비어있을 경우 안내 메시지 출력
+            embed = discord.Embed(
+                description="올바른 과제 내용을 입력해주세요",
+                color=0xFF0000
+            )
+            await ctx.send(embed=embed)
             return
 
-        # 입력 유효성 검사 - 날짜 형식이 올바른지 확인
+        if not deadline:
+            # 마감일이 비어있을 경우 안내 메시지 출력
+            embed = discord.Embed(
+                description="올바른 마감일을 입력해주세요",
+                color=0xFF0000
+            )
+            await ctx.send(embed=embed)
+            return
+
         try:
             valid_date = datetime.strptime(deadline, "%Y-%m-%d").date()
         except ValueError:
-            await ctx.send("올바른 날짜 형식(YYYY-MM-DD)으로 입력해주세요.")
+            # 날짜 형식이 올바르지 않을 경우 안내 메시지 출력
+            embed = discord.Embed(
+                description="올바른 날짜 형식(YYYY-MM-DD)으로 입력해주세요",
+                color=0xFF0000
+            )
+            await ctx.send(embed=embed)
             return
 
         # 유효성 검사 통과시 과제 부여
@@ -69,19 +101,19 @@ class Assignment(commands.Cog):
             description="과제 부여 완료",
             color=0x3498db
         )
+        self.save_assignments()
         await ctx.send(embed=embed)
-        await self.save_assignments()
 
     @assignment_group.command(name="확인")
     async def show_assignment(self, ctx):
-        """사용자가 '과제 확인' 명령어를 입력하면 실행되는 함수입니다. 모든 멤버의 과제를 출력합니다"""
+        """'과제 확인' 명령어 처리 함수"""
         members = ctx.guild.members
         data = ""
         for member in members:
             if not member.bot:
-                data += f"{member.name}\n"
-                if member.name in self.assignments:
-                    for idx, assignment in enumerate(self.assignments[member.name]):
+                data += f"{member.display_name}\n"
+                if member.display_name in self.assignments:
+                    for idx, assignment in enumerate(self.assignments[member.display_name]):
                         data += f"- {assignment['과제명']}: {assignment['마감일']}까지\n"
                 else:
                     data += "- 과제 없음\n"
@@ -91,13 +123,40 @@ class Assignment(commands.Cog):
         )
         await ctx.send(embed=embed)
 
-    @tasks.loop(minutes=1)  # 1분 주기로 반복
-    async def check_deadlines(self):
-        print("과제 검사를 시작합니다")
+    @assignment_group.command(name="삭제")
+    async def remove_assignment(self, ctx, user, content):
+        """'과제 삭제' 명령어 처리 함수"""
+        if user in self.assignments and any(assignment['과제명'] == content for assignment in self.assignments[user]):
+            self.assignments[user] = [assignment for assignment in self.assignments[user] if
+                                      assignment['과제명'] != content]
+            print(f"{user}의 {content} 과제가 삭제되었습니다.")
         print(self.assignments)
-        now = datetime.now().date()
-        for user, assignments in self.assignments.items():
-            for assignment in assignments:
-                deadline = datetime.strptime(assignment['마감일'], "%Y-%m-%d").date()
-                if deadline == now + timedelta(days=1):
-                    print(f"{assignment} 의 마감일이 하루 남았습니다")
+        self.save_assignments()
+
+    @tasks.loop(minutes=1)
+    async def check_deadlines(self):
+        """과제 마감일 확인 및 처리하는 함수"""
+        self.upadate_channel()
+        print(self.channel_id)
+        if self.channel_id is not None:
+            print("과제 검사를 시작합니다")
+            reserve_remove = []
+            today = datetime.now().date()
+
+            channel = self.bot.get_channel(self.channel_id)
+
+            for user, assignments in self.assignments.items():
+                for assignment in assignments:
+                    deadline = datetime.strptime(assignment['마감일'], "%Y-%m-%d").date()
+                    if deadline == today + timedelta(days=1):
+                        embed = discord.Embed(
+                            title="과제 마감 임박",
+                            description=f"{user}님의 {assignment['과제명']}의 마감기한이 1일 남았습니다",
+                            color=0xFFA500
+                        )
+                        await channel.send(embed=embed)
+                    elif deadline < today:
+                        reserve_remove.append((user, assignment))
+            for user, assignment in reserve_remove:
+                self.assignments[user].remove(assignment)
+            self.save_assignments()

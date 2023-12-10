@@ -18,8 +18,8 @@ class Event:
         return self.assigned == ""
             
     @staticmethod
-    def check_date(date): 
-        '''입력된 날짜가 유효한지 확인'''
+    def check_date(date):
+        """입력된 날짜가 유효한지 확인"""
         try:
             datetime.strptime(date, "%Y-%m-%d %H")
         except ValueError: 
