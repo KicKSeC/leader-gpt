@@ -327,4 +327,8 @@ class MeetingTime(commands.Cog):
         if result_message == "회의가능한 시간:\n":
             result_message = "회의가능한 시간이 없습니다."
 
-        await ctx.send(embe=discord.Embed(description=result_message, color=0x3498db))
+        # 임베드 생성
+        embed = discord.Embed(description=result_message, color=0x3498db)
+
+        # 메시지 전송
+        await ctx.send(embed=embed)

@@ -3,7 +3,6 @@ from os import error
 import discord
 from datetime import datetime
 from discord.ext import commands, tasks
-from outcome import Value
 from events import Event, Events
 from settings import Settings
 
