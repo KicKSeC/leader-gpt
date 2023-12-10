@@ -16,9 +16,10 @@ class UserSettings(commands.Cog):
         # 만약 서브 커맨드가 없다면, 사용 가능한 명령어 목록을 출력합니다.
         if ctx.invoked_subcommand is None:
             available_commands = ["채널"]
+            description = '\n- !설정 ' + '\n- !설정 '.join(available_commands)
             embed = discord.Embed(
                 title="명령어 목록",
-                description='\n- !설정 '.join(available_commands),
+                description=description,
                 color=0x3498db  # 임베드 색상 설정
             )
             await ctx.send(embed=embed)

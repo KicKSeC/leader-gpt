@@ -137,9 +137,9 @@ class Schedule(commands.Cog):
     async def show_schedule(self, ctx):
         """일정을 나열하는 커팬드"""  # TODO 출력 디자인 개선
         events = self.events.get_events()
-        description = "날짜:이름:내용:할당\n"
+        description = "날짜\t: 이름\t: 내용\t: 할당\n"
         for event in events:
-            description += f'{event.date.strftime("%Y-%m-%d %H")}:{event.name}:{event.content}:{event.assigned}\n'
+            description += f'{event.date.strftime("%Y-%m-%d %H"):10}:{event.name:5}:{event.content:10}:{event.assigned:5}\n'
         embed = discord.Embed(
             title="일정 목록",
             description=description,

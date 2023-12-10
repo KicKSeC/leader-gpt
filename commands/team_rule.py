@@ -46,7 +46,7 @@ class TeamRule(commands.Cog):
                 await msg.edit(content=rules+"-")
             await msg.delete()    # embed로 나타내기 위해 기존 메세지 제거 
 
-            logging.info("Done: %s", rules)
+            logging.info("Making Rules is Done: %s", rules)
             await ctx.send(embed=discord.Embed(title="규칙", description=rules, color=0x3498db))
 
             # 나열된 규칙을 개별적으로 나누어 (빈 거 제외하고) 각각 저장
