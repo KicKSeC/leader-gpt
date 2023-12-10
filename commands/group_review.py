@@ -9,7 +9,6 @@ class GroupReview(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-
         self.evaluations = {}
 
     @commands.group(name="팀원평가")
