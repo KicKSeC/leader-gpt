@@ -198,9 +198,38 @@ class MeetingTime(commands.Cog):
 
     # 회의시간을 정하면 저장된 시간 삭제
     @commands.command(name="회의시간삭제")
-    async def delete_meetingTime(self, ctx):
-        self.meetingTime = {}
-        await ctx.send(embed=discord.Embed(description="저장된 회의시간을 삭제했습니다.", color=0x3498db))
+    async def delete_meetingTime(self, ctx, date, time):
+        
+        #입력 오류 처리
+        try:
+            valid_date = datetime.strptime(date, "%m/%d")
+        except ValueError:
+            embed = discord.Embed(
+                description="올바른 날짜 형식(ex 12/4 12:00~14:00)으로 입력해주세요.",
+                color=0xFF0000
+            )
+            await ctx.send(embed=embed)
+            return
+        try:
+            start_time, end_time = map(lambda x: x.strip(), time.split('~'))
+            valid_start_time = datetime.strptime(start_time, "%H:%M")
+            valid_end_time = datetime.strptime(end_time, "%H:%M")
+        except ValueError:
+            embed = discord.Embed(
+                description="올바른 시간 형식(ex 12:00~14:00)으로 입력해주세요.",
+                color=0xFF0000
+            )
+        if date in self.meetingTime:
+            if time in self.meetingTime[date]:
+                self.meetingTime[date].remove(time)
+                await ctx.send(embed=discord.Embed(description=f"저장된 회의시간{date} {time}을(를) 삭제했습니다.", color=0x3498db))
+                #시간 삭제 후, 해당하는 날짜에 남아 있는 시간이 없으면 날짜를 삭제
+                if not self.meetingTime[date]:
+                    del self.meetingTime[date]
+            else:
+                await ctx.send(embed=discord.Embed(description=f"입력하신 시간 {date} {time} 이(가) 회의시간에 존재하지 않습니다."))
+        else:
+             await ctx.send(embed=discord.Embed(description=f"입력하신 시간 {date} {time} 이(가) 회의시간에 존재하지 않습니다."))
 
     # 저장된 팀원의 정보를 삭제
     @commands.command(name="팀원삭제")
@@ -318,17 +347,32 @@ class MeetingTime(commands.Cog):
                 self.meetingTime[date] = unique_times
 
         # 사용자에게 보내는 메시지 형식 변경 - 시간 순서대로 출력
-        result_message = "회의가능한 시간:\n"
+        result_message = "회의 가능한 시간:\n"
         for date, times in sorted(self.meetingTime.items()):
             # 시간을 시간 순서대로 정렬
             sorted_times = sorted(times)
             formatted_times = ', '.join(sorted_times)
             result_message += f"{date}: {formatted_times}\n"
-        if result_message == "회의가능한 시간:\n":
-            result_message = "회의가능한 시간이 없습니다."
+        if result_message == "회의 가능한 시간:\n":
+            result_message = "회의 가능한 시간이 없습니다."
 
         # 임베드 생성
         embed = discord.Embed(description=result_message, color=0x3498db)
 
         # 메시지 전송
+        await ctx.send(embed=embed)
+
+
+    @commands.command(name="회의시간목록")
+    async def print_meeting_time(self, ctx):
+        result_message = "회의 가능한 시간:\n"
+        for date, times in sorted(self.meetingTime.items()):
+            # 시간을 시간 순서대로 정렬
+            sorted_times = sorted(times)
+            formatted_times = ', '.join(sorted_times)
+            result_message += f"{date}: {formatted_times}\n"
+        if result_message == "회의 가능한 시간:\n":
+            result_message = "회의 가능한 시간이 없습니다."
+            
+        embed = discord.Embed(description=result_message, color=0x3498db)
         await ctx.send(embed=embed)
