@@ -1,9 +1,11 @@
 ﻿import discord
+import logging
 from discord.ext import commands
 from chatgpt import ChatGPT
 
 # TODO 더 나은 팀 규칙 생성 프롬프트 작성
-PROMPT_CREATE_RULE = "팀을 위한 규칙을 숫자 없이 나열해. 조원이 불참했을 때, 분쟁이 있을 때 등등"
+# PROMPT_CREATE_RULE = "팀을 위한 규칙을 나열해. 조원이 불참했을 때, 분쟁이 있을 때 등등"
+PROMPT_CREATE_RULE = "say '12. This is a Test'"
 
 
 class TeamRule(commands.Cog):
@@ -31,7 +33,7 @@ class TeamRule(commands.Cog):
         if not ChatGPT.is_answering:  # 챗지피티가 이미 사용되고 있지는 않은지 확인
             await ctx.send(embed=discord.Embed(description="ChatGPT를 통해 규칙생성", color=0x3498db))
             
-            rules = "규칙\n"
+            rules = "규칙 생성중"
             msg = await ctx.send(rules)
             stream = ChatGPT.get_response_by_stream(PROMPT_CREATE_RULE)
             
@@ -42,13 +44,18 @@ class TeamRule(commands.Cog):
                     break
                 
                 await msg.edit(content=rules+"-")
-            await msg.edit(content="")
-         
-            await ctx.send(embed=discord.Embed(description=rules, color=0x3498db))
+            await msg.delete()    # embed로 나타내기 위해 기존 메세지 제거 
+
+            logging.info("Done: %s", rules)
+            await ctx.send(embed=discord.Embed(title="규칙", description=rules, color=0x3498db))
 
             # 나열된 규칙을 개별적으로 나누어 (빈 거 제외하고) 각각 저장
             for rule in [x for x in rules.split('\n') if x != ""]:
-                self.rules.append(rule)
+                pure_rule = rule
+                index = rule.find('. ')
+                if index != -1 and rule[:index].isdigit():  # "12. 가나다"일 때, '가나다'추출
+                    pure_rule = rule[index + 2:]  # 숫자와 점 이후의 문자열을 저장
+                self.rules.append(pure_rule)
         else:
             await ctx.send(embed=discord.Embed(description="이미 답변 중에 있습니다. 답변 이후에 요청해 주십시오.", color=0x3498db))
 
