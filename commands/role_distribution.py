@@ -38,7 +38,11 @@ class RoleDistribution(commands.Cog):
         n = 0
         # 입력받은 역할의 개수와 팀원 수가 일치하지 않는 경우, 안내 메시지를 출력하고 함수를 종료합니다.
         if len(roles) != members_count and len(roles) > 0:
-            await ctx.send("입력받은 역할의 개수와 팀 구성원의 명수가 일치하지 않습니다")
+            embed = discord.Embed(
+                description="입력받은 역할의 개수와 팀 구성원의 명수가 일치하지 않습니다",
+                color=0xFF0000
+            )
+            await ctx.send(embed=embed)
             return
 
         if len(roles) == 0:

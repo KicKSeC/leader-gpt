@@ -27,9 +27,7 @@ class Assignment(commands.Cog):
         try:
             with open(self.path_setting, 'r') as f:
                 content = json.load(f)
-                print(content)
                 self.channel_id = content.get("channel")
-                print(self.channel_id)
         except FileNotFoundError:
             print("파일 없음")
             self.channel_id = None
@@ -140,8 +138,12 @@ class Assignment(commands.Cog):
         if user in self.assignments and any(assignment['과제명'] == content for assignment in self.assignments[user]):
             self.assignments[user] = [assignment for assignment in self.assignments[user] if
                                       assignment['과제명'] != content]
-            print(f"{user}의 {content} 과제가 삭제되었습니다.")
-        print(self.assignments)
+            embed = discord.Embed(
+                title="과제 마감 임박",
+                description=f"{user}의 {content} 과제가 삭제되었습니다.",
+                color=0xFFA500
+            )
+            ctx.send(embed=embed)
         self.save_assignments()
 
     @tasks.loop(minutes=1)
