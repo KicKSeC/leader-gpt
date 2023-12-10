@@ -18,52 +18,52 @@ class RoleDistribution(commands.Cog):
         # 만약 서브 커맨드가 없다면, 역할분담 방식과 역할을 입력하도록 안내합니다.
         if ctx.invoked_subcommand is None:
             embed = discord.Embed(
-                title="명령어 목록",
-                description="역할분담 방식과 역할을 입력해주세요\n"
-                            "- 자동분배\n"
-                            "- 사다리타기\n"
-                            "- 제비뽑기\n"
-                            "예: !역할분담 자동분배 역할1 역할2 역할3\n"
+                title="사용법",
+                description="예: !역할분담 시작 역할1 역할2 역할3\n"
                             "역할이 입력되지 않는다면 역할이 숫자로 분배됩니다",
                 color=0x3498db
             )
             await ctx.send(embed=embed)
 
-    @role_dividing.command(name="자동분배")
+    @role_dividing.command(name="시작")
     async def role_random(self, ctx, *roles):
         """사용자가 '역할분담 자동분배' 명령어를 입력하면 실행되는 함수입니다. 입력된 역할을 무작위로 분배합니다."""
-        roles = list(roles)
-        members_count = len(ctx.guild.members) - 1
+        member_count = 0
         members = ctx.guild.members
-        n = 0
-        # 입력받은 역할의 개수와 팀원 수가 일치하지 않는 경우, 안내 메시지를 출력하고 함수를 종료합니다.
-        if len(roles) != members_count and len(roles) > 0:
-            embed = discord.Embed(
-                description="입력받은 역할의 개수와 팀 구성원의 명수가 일치하지 않습니다",
-                color=0xFF0000
-            )
-            await ctx.send(embed=embed)
-            return
-
-        if len(roles) == 0:
-            roles = [n for n in range(1, members_count + 1)]
-
-        random.shuffle(roles)
+        embed = None
         for member in members:
             if not member.bot:
-                self.role[member.name] = roles[n]
-                n += 1
+                member_count += 1
 
-        self.role = dict(sorted(self.role.items(), key=lambda x: x[1]))
-        result = ""
-        for r in self.role:
-            result += f"{r}: {self.role[r]}\n"
-        await ctx.send(embed=discord.Embed(description="역할분담이 완료되었습니다\n'!역할분담 결과'를 통해 결과를 확인하세요", color=0x3498db))
+        if roles:
+            roles = list(roles)
+            # 입력받은 역할의 개수와 팀원 수가 일치하지 않는 경우, 안내 메시지를 출력하고 함수를 종료합니다.
+            if len(roles) != member_count:
+                embed = discord.Embed(
+                    description="입력받은 역할의 개수와 팀 구성원의 명수가 일치하지 않습니다",
+                    color=0xFF0000
+                )
+                await ctx.send(embed=embed)
+                return
+        else:
+            roles = [n + 1 for n in range(member_count)]
+        random.shuffle(roles)
+        n = 0
+        for member in members:
+            if not member.bot:
+                self.role[member.display_name] = roles[n]
+                n += 1
+                embed = discord.Embed(
+                    description="역할분담이 완료되었습니다\n"
+                                "'!역할분담 결과'를 통해 결과를 확인하세요",
+                    color=0x3498db
+                )
+        await ctx.send(embed=embed)
 
     @role_dividing.command(name="결과")
     async def role_result(self, ctx):
         """사용자가 '역할분담 결과' 명령어를 입력하면 실행되는 함수입니다. 역할 분배 결과를 출력합니다."""
         result = ""
-        for r in self.role:
-            result += f"- {r}: {self.role[r]}\n"
+        for member, role in self.role.items():
+            result += f"- {member}: {role}\n"
         await ctx.send(embed=discord.Embed(title="역할분담 결과", description=result, color=0x3498db))
