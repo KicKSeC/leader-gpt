@@ -181,7 +181,7 @@ class Schedule(commands.Cog):
         # 현재 시간을 기준으로 일정이 지난 리스트들을 확인하고 삭제
         while True:
             event = self.events.get_head()
-            if not event is None and now > event.date:  # 일정이 지남
+            if event is not None and now > event.date:  # 일정이 지남
                 description = f"{event.content}"
                 if not event.is_assignment():  # 과제 할당 여부
                     description += f"\n{event.assigned}에게 할당됨"
