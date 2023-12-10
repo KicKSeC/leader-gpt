@@ -64,7 +64,7 @@ class Schedule(commands.Cog):
         error_embed = discord.Embed(
                 title="입력을 확인하여주십시오",
                 description='예시) !일정 추가 "2023-10-20 20" "일정 이름" "내용" (선택)"과제 해당자"\n',
-                color=0x3498db
+                color=0xFF0000
             )
         if (not date or not name or not content) or not Event.check_date(date):
             await ctx.send(embed=error_embed)
@@ -108,7 +108,7 @@ class Schedule(commands.Cog):
             embed = discord.Embed(
                 title="입력을 확인하여주십시오",
                 description='예시) !일정 삭제 "2023-10-20 20"\n',
-                color=0x3498db
+                color=0xFF0000
             )
             await ctx.send(embed=embed)
             return
@@ -124,7 +124,7 @@ class Schedule(commands.Cog):
             embed = discord.Embed(
                 title=f"{name} 일정이 삭제되지 못하였습니다",
                 description="정확히 입력하였는지 확인하십시오",
-                color=0x3498db
+                color=0xFF0000
             )
         await ctx.send(embed=embed)
 
