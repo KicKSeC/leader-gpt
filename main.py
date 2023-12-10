@@ -41,4 +41,4 @@ async def on_command_error(ctx, error):
         await ctx.send("존재하지 않는 명령어입니다 -> !도움말")
 
 
-bot.run(Settings.load('DISCORD_TOKEN'))
+bot.run(Settings.load('DISCORD_TOKEN', is_setting=True))

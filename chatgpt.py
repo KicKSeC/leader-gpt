@@ -11,7 +11,8 @@ class ChatGPT:
     system_role_prompt = "You are a supportive team leader and enabler of your teammates' goals."
     is_answering = False
     token_usage = 0  # 사용된 총 토큰 수
-    __client = OpenAI(api_key=Settings.load('OPENAI_API_KEY'))
+    api_key = Settings.load('OPENAI_API_KEY', is_setting=True)
+    __client = OpenAI(api_key=api_key)
 
     class AlreadyAnsweringError(Exception):
         """ChatGPT는 한번에 하나만 답변 가능하므로 이미 답변 중일 때 발생하는 에러"""
@@ -97,6 +98,6 @@ class ChatGPT:
 
 
 if __name__ == '__main__':
-    INTRO = "3줄로 자기소개 부탁해"
+    INTRO = "10글자로 자기소개 부탁해"
     print(INTRO)
     print(ChatGPT.get_response(INTRO))
