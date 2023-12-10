@@ -176,7 +176,7 @@ class Schedule(commands.Cog):
         # 현재 시간을 기준으로 일정이 지난 리스트들을 확인하고 삭제
         while True:
             event = self.events.get_head()
-            if not event is None and now > event.date:  # 일정이 지남
+            if event is not None and now > event.date:  # 일정이 지남
                 description = f"{event.content}"
                 if not event.is_assignment():  # 과제 할당 여부
                     description += f"\n{event.assigned}에게 할당됨"
@@ -187,7 +187,7 @@ class Schedule(commands.Cog):
                 )
 
                 channel = self.bot.get_channel(Settings.load('channel'))
-                if not channel is None:  # TODO 채널이 할당되지 않았다면 출력하지 못함...
+                if channel is not None:  # TODO 채널이 할당되지 않았다면 출력하지 못함...
                     await channel.send(embed=embed)
 
                 event = self.events.pop()  # 지난 일정 삭제

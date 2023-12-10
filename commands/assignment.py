@@ -58,8 +58,19 @@ class Assignment(commands.Cog):
             await ctx.send(embed=embed)
 
     @assignment_group.command(name="부여")
-    async def assign_assignment(self, ctx, content, deadline):
+    async def assign_assignment(self, ctx, content=None, deadline=None):
         """'과제 부여' 명령어 처리 함수"""
+        if content is None and deadline is None:
+            # 도움말을 요청할 때 설명하는 Embed 메시지 출력
+            embed = discord.Embed(
+                title="과제 부여 명령어 사용법",
+                description="`!과제 부여` 명령어를 사용하여 과제를 부여할 수 있습니다.\n"
+                            "사용법: `!과제 부여 [과제 내용] [마감일(YYYY-MM-DD)]`\n"
+                            "예시: `!과제 부여 레포트작성 2024-01-15`",
+                color=0x3498db
+            )
+            await ctx.send(embed=embed)
+            return
         user = ctx.author.display_name
 
         # 입력 유효성 검사
