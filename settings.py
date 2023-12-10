@@ -36,19 +36,34 @@ class Settings:
             Settings.save('DISCORD_TOKEN', key)
 
     @classmethod
-    def save(cls, key, data):
-        """setting.json으로부터 채널 정보를 저장함"""
-
-        with open(cls.path_setting, 'r', encoding='utf-8') as f:
+    def save(cls, key, data, is_setting=False):
+        """
+        settings.json이나 data.json과 같은 json 파일에 접근하여 데이터를 저장오는 함수
+        Args:
+            is_setting: setting.json에 접근할 것인지 여부. 기본값 False라면 data에 접근한다.
+        """
+        if os.path.isfile(os.path.join('data', 'data')):
+            raise FileNotFoundError('대상 파일을 찾을 수 없습니다')
+        
+        path = cls.path_data if is_setting else cls.path_setting
+        with open(path, 'r', encoding='utf-8') as f:
             content = json.load(f)
         content[key] = data
         with open(cls.path_setting, 'w', encoding='utf-8') as f:
             json.dump(content, f, indent=4)
 
     @classmethod
-    def load(cls, key: str):
-        """setting.json으로부터 채널 정보를 불러옴"""
-        with open(cls.path_setting, 'r', encoding='utf-8') as f:
+    def load(cls, key: str, is_setting=False):
+        """
+        settings.json이나 data.json과 같은 json 파일에 접근하여 데이터를 불러오는 함수
+        Args:
+            is_setting: setting.json에 접근할 것인지 여부. 기본값 False라면 data에 접근한다.
+        """
+        if os.path.isfile(os.path.join('data', 'data')):
+            raise FileNotFoundError('대상 파일을 찾을 수 없습니다')
+
+        path = cls.path_data if is_setting else cls.path_setting
+        with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f).get(key)
 
         return data

@@ -1,8 +1,7 @@
-﻿import heapq
-import csv
-import logging
-import os
-from datetime import datetime
+﻿import heapq 
+import logging 
+from datetime import datetime 
+from settings import Settings
 
 class Event:
     '''이벤트의 정보를 저장하는 클래스'''
@@ -29,14 +28,13 @@ class Event:
         
 class Events:
     """이벤트들을 딕셔너리와 힙을 사용해 관리하는 클래스"""
-    path = 'data\\events.csv'
     
-    def __init__(self, load=True):  # load: events.csv에서 스케줄을 읽어들일 것인지 여부
+    def __init__(self, key, load=True):  # load: events.csv에서 스케줄을 읽어들일 것인지 여부
         self.heap = []
         self.dict = {}
         
-        if load and os.path.isfile('events.csv'):    # 저장된 파일이 이미 있다면 로드
-            self.load()
+        if load:    # 저장된 파일이 이미 있다면 로드
+            self.load(key)
     
     def push(self, date:str, name:str, content="", assigned=""):
         '''입력된 이벤트 날짜, 이름, 내용, 할당으로 새 이벤트를 삽입'''
@@ -89,37 +87,34 @@ class Events:
         
         return sorted_events
     
-    def save(self):
+    def save(self, key):
         '''이벤트들을 정렬하여 csv 파일로 저장'''
-        events = self.get_events()
-        
-        with open(Events.path, 'w', encoding='utf-8', newline='') as f:
-            wr = csv.writer(f)
-            for event in events:
-                wr.writerow([event.date.strftime("%Y-%m-%d %H"), event.name, event.content, event.assigned])
+        events = []
+        for timestamp in self.heap:
+            events.append(self.dict[timestamp])
+            
+        Settings.save(key, events) 
     
-    def load(self):
+    def load(self, key):
         '''파일에서 정렬된 이벤트들을 읽어들여 heapify하고 저장'''
         # 기존 데이터 비우기
         self.dict = {}
         self.heap = []
         
-        try:
-            with open(Events.path, 'r', encoding='utf-8') as f:
-                rdr = csv.reader(f) 
-                for line in rdr:
-                    date = datetime.strptime(line[0], "%Y-%m-%d %H")
-                    timestamp = date.timestamp()                # key
-                    
-                    self.dict[timestamp] = Event(
-                        datetime.strptime(line[0], '%Y-%m-%d %H'), # date
-                        line[1],        # name
-                        line[2],         # content
-                        line[3]         # assgined
-                    )
-                    self.heap.append(timestamp)
-                    
-        except FileNotFoundError as e:
-            print("파일이 없습니다: ", e)
+        schedules: list = Settings.load(key)
+        if schedules is None:
+            return 
         
+        for e in schedules:
+            date = datetime.strptime(e[0], "%Y-%m-%d %H")
+            timestamp = date.timestamp()        # key
+
+            self.dict[timestamp] = Event(
+                datetime.strptime(e[0], '%Y-%m-%d %H'), 
+                e[1],
+                e[2],
+                e[3]
+            )
+            self.heap.append(timestamp)
+            
         heapq.heapify(self.heap)

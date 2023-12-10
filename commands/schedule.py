@@ -14,7 +14,8 @@ class Schedule(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.next_meeting = ""
-        self.events = Events()
+        self.name = 'schedule'
+        self.events = Events(self.name)
 
         self.check_schedule_launcher.start()  # 에러가 뜨지만 잘 작동함
 
@@ -122,7 +123,7 @@ class Schedule(commands.Cog):
 
     @schedule.command(name="저장")
     async def save_schedule(self, ctx):
-        self.events.save()
+        self.events.save(self.name)
         await ctx.send("저장되었습니다!")
 
     @schedule.command(name="확인")
