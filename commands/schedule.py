@@ -1,7 +1,9 @@
 ﻿import logging
+from os import error
 import discord
 from datetime import datetime
 from discord.ext import commands, tasks
+from outcome import Value
 from events import Event, Events
 from settings import Settings
 
@@ -17,7 +19,7 @@ class Schedule(commands.Cog):
         self.name = 'schedule'
         self.events = Events(self.name)
 
-        self.check_schedule_launcher.start()  # 에러가 뜨지만 잘 작동함
+        self.check_schedule.start() 
 
     @commands.group(name="일정")
     async def schedule(self, ctx):
@@ -60,14 +62,23 @@ class Schedule(commands.Cog):
         date, name, content, assigned = parse_schedule_input(input_string)
         logging.info('%s, %s, %s, %s', date, name, content, assigned)
 
-        if (not date or not name or not content) or not Event.check_date(date):
-            embed = discord.Embed(
+        error_embed = discord.Embed(
                 title="입력을 확인하여주십시오",
                 description='예시) !일정 추가 "2023-10-20 20" "일정 이름" "내용" (선택)"과제 해당자"\n',
                 color=0x3498db
             )
-            await ctx.send(embed=embed)
+        if (not date or not name or not content) or not Event.check_date(date):
+            await ctx.send(embed=error_embed)
             return
+        
+        if assigned is None:
+            raise ValueError()
+        try:
+            self.events.push(date, name, content, assigned)
+        except ValueError as e:
+            await ctx.send(embed=error_embed)
+            return 
+        
         description = f"date: {date}\n" + f"name: {name}\n" + f"content: {content}\n"
         description += f"assigned: {assigned if (assigned != '') else '없음'}"
         embed = discord.Embed(
@@ -76,9 +87,6 @@ class Schedule(commands.Cog):
             color=0x3498db
         )
 
-        if assigned is None:
-            raise ValueError()
-        self.events.push(date, name, content, assigned)
         await ctx.send(embed=embed)
 
     @schedule.command(name="삭제")
@@ -160,19 +168,15 @@ class Schedule(commands.Cog):
         """사용자가 '회의시간 정하기' 명령어를 입력하면 실행되는 함수입니다. 회의 참석 가능 시간을 입력하도록 안내합니다."""
         await ctx.send(embed=discord.Embed(description="본인의 참석가능한 시간을 입력해주세요", color=0x3498db))
 
-    @tasks.loop(minutes=1)
-    async def check_schedule_launcher(self):
-        """하루의 매 시간, 즉 분침이 0일 때 일정을 확인하기 위해 분침이 0일 때 실행하고 종료"""
-        now = datetime.now()
-        if now.minute == 0:
-            self.check_schedule.start()
-            self.check_schedule_launcher.stop()
-
-    @tasks.loop(minutes=60)
+    @tasks.loop(minutes=1)      # 1분씩 작동하다 0분이 되면 1시간마다 작동 
     # @tasks.loop(minutes=1)
     async def check_schedule(self):
         """일정이 지났는지 확인하여 지난 일정을 채널에 표시"""
         now = datetime.now()
+
+        # 0분이 되었는지 확인
+        if now.minute == 0:
+            self.check_schedule.change_interval(minutes=60)
 
         # 현재 시간을 기준으로 일정이 지난 리스트들을 확인하고 삭제
         while True:
@@ -188,7 +192,7 @@ class Schedule(commands.Cog):
                 )
 
                 channel = self.bot.get_channel(Settings.load('channel'))
-                if not channel is None:  # TODO 채널이 할당되지 않았다면 출력하지 못함...
+                if not channel is None:  
                     await channel.send(embed=embed)
 
                 event = self.events.pop()  # 지난 일정 삭제

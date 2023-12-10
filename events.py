@@ -45,6 +45,9 @@ class Events:
             assigned=assigned
         )
         key = event.date.timestamp()
+        if not self.dict.get(key) is None:
+            raise ValueError("이미 존재하는 키입니다")
+        
         self.dict[key] = event
         heapq.heappush(self.heap, key)
 
@@ -57,6 +60,7 @@ class Events:
     
     def get_head(self):
         '''가장 이른 이벤트를 반환합니다'''
+        logging.info(self.dict)
         if len(self.heap) > 0:
             return self.dict[self.heap[0]]
         return None
@@ -88,10 +92,16 @@ class Events:
         return sorted_events
     
     def save(self, key):
-        '''이벤트들을 정렬하여 csv 파일로 저장'''
+        '''이벤트들을 저장'''
         events = []
         for timestamp in self.heap:
-            events.append(self.dict[timestamp])
+            event: Event = self.dict[timestamp]
+            events.append([
+                datetime.strftime(event.date, "%Y-%m-%d %H"), 
+                event.name, 
+                event.content, 
+                event.assigned
+            ])
             
         Settings.save(key, events) 
     
