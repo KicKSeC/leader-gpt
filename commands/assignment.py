@@ -1,4 +1,5 @@
-﻿import discord
+﻿from uu import decode
+import discord
 from datetime import datetime, timedelta
 from discord.ext import commands, tasks
 import os
@@ -16,7 +17,7 @@ class Assignment(commands.Cog):
         self.path_setting = os.path.join("data", "settings.json")  # 채널 ID 저장되어 있는 파일 경로 설정
         self.channel_id = None
         try:
-            with open(self.path_data, 'r') as f:
+            with open(self.path_data, 'r', encoding='utf-8') as f:
                 content = json.load(f)
                 self.assignments = content.get("assignment", {})  # 데이터 로드, 없으면 빈 딕셔너리 생성
         except FileNotFoundError:
@@ -25,7 +26,7 @@ class Assignment(commands.Cog):
     def upadate_channel(self):
         print("채널 id 업데이트")
         try:
-            with open(self.path_setting, 'r') as f:
+            with open(self.path_setting, 'r', encoding='utf-8') as f:
                 content = json.load(f)
                 self.channel_id = content.get("channel")
         except FileNotFoundError:
