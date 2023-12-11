@@ -30,7 +30,7 @@ class UserSettings(commands.Cog):
         try:
             channel = ctx.channel.id
 
-            Settings.save('channel', channel)
+            Settings.save('channel', channel, is_setting=True)
 
             embed = discord.Embed(
                 title="채널 변경 완료",
