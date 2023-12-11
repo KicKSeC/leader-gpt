@@ -57,7 +57,7 @@ class TeamRule(commands.Cog):
                     pure_rule = rule[index + 2:]  # 숫자와 점 이후의 문자열을 저장
                 self.rules.append(pure_rule)
         else:
-            await ctx.send(embed=discord.Embed(description="이미 답변 중에 있습니다. 답변 이후에 요청해 주십시오.", color=0x3498db))
+            await ctx.send(embed=discord.Embed(description="이미 답변 중에 있습니다. 답변 이후에 요청해 주십시오.", color=0xFF0000))
 
     # 인덱스 붙이는 과정에서 문제 발생
     @rule.command(name="추가")

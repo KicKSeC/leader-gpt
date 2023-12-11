@@ -35,7 +35,7 @@ class MeetingLog(commands.Cog):
     async def start_record(self, ctx):
         """기록 시작"""
         if "기록" in self.record_names:
-            await ctx.send(embed=discord.Embed(description="이미 기록중입니다", color=0x3498db))
+            await ctx.send(embed=discord.Embed(description="이미 기록중입니다", color=0xFF0000))
             return
 
         await ctx.send(embed=discord.Embed(description="기록 시작", color=0x3498db))
@@ -60,7 +60,7 @@ class MeetingLog(commands.Cog):
     async def create_meeting_log(self, ctx):
         """사용자가 '회의록작성' 명령어를 입력하면 실행되는 함수입니다. 회의록 작성을 시작합니다."""
         if not self.conversation["기록"]:
-            await ctx.send(embed=discord.Embed(description="기록된 회의가 없습니다. '!기록 시작'으로 회의를 기록하십시오.", color=0x3498db))
+            await ctx.send(embed=discord.Embed(description="기록된 회의가 없습니다. '!기록 시작'으로 회의를 기록하십시오.", color=0xFF0000))
             return
 
         prompt = PROMPT_CREATE_MEETING_LOG + "\n" + "\n".join(
