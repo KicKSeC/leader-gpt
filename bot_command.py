@@ -1,8 +1,8 @@
-import discord 
+import discord
 import matplotlib.pyplot as plt
 from chatgpt import ChatGPT
 from discord.ext import commands
-                
+
 
 class LGPTCommand(commands.Cog):
     def __init__(self, bot):
@@ -12,7 +12,7 @@ class LGPTCommand(commands.Cog):
         """
         self.bot = bot
         self.commands = ["도움말", "설정", "답변", "규칙", "평가", "팀원평가", "회의시간", "역할분담",
-                          "기록", "회의록작성", "이메일", "과제", "그래프", "일정"]
+                         "기록", "회의록작성", "과제", "일정"]
 
     @commands.group(name="도움말")
     async def help(self, ctx: discord.ext.commands.Context):
@@ -27,23 +27,22 @@ class LGPTCommand(commands.Cog):
                 color=0x3498db  # 임베드 색상 설정
             )
             await ctx.send(embed=embed)
-    
+
     @commands.command(name="답변")
     async def answer(self, ctx, *, message):
         '''챗지피티 답변 생성'''
         msg = await ctx.send("답변중...")
         ans_txt = ""
         stream = ChatGPT.get_response_by_stream(message)
-        
-        while True:
-            try: 
-                ans_txt = next(stream)
-            except StopIteration:       # 답변이 끝났는지 확인
-                break
-            
-            await msg.edit(content=ans_txt+"-")
-        await msg.edit(content=ans_txt)
 
+        while True:
+            try:
+                ans_txt = next(stream)
+            except StopIteration:  # 답변이 끝났는지 확인
+                break
+
+            await msg.edit(content=ans_txt + "-")
+        await msg.edit(content=ans_txt)
 
     # 최종 구현여부가 정해지지 않은 기능
     @commands.command(name="그래프")

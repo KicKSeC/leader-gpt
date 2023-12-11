@@ -1,6 +1,6 @@
-﻿import logging 
+﻿import logging
 import time
-from openai import OpenAI 
+from openai import OpenAI
 from settings import Settings
 
 
@@ -34,9 +34,9 @@ class ChatGPT:
             response = ChatGPT.__client.chat.completions.create(
                 model=model,
                 messages=[
-                    {"role":"system", "content": ChatGPT.system_role_prompt},
+                    {"role": "system", "content": ChatGPT.system_role_prompt},
                     {"role": user, "content": message}  # type: ignore
-                ]  
+                ]
             )
         finally:
             ChatGPT.is_answering = False
@@ -66,28 +66,27 @@ class ChatGPT:
             stream = ChatGPT.__client.chat.completions.create(
                 model=model,
                 messages=[
-                        {"role":"system", "content": ChatGPT.system_role_prompt},
-                        {"role":user, "content": message}   # type: ignore
-                ], 
+                    {"role": "system", "content": ChatGPT.system_role_prompt},
+                    {"role": user, "content": message}  # type: ignore
+                ],
                 stream=True
             )
             answer = ""
             start_time = time.time()
-            for chunk in stream:    # type: ignore
+            for chunk in stream:  # type: ignore
                 if chunk.choices[0].delta.content is not None:
                     delta = chunk.choices[0].delta.content
                     answer += delta
-                    
-                    if time.time() - start_time > 1:    # 특정 시간마다 답변을 반환
+
+                    if time.time() - start_time > 1:  # 특정 시간마다 답변을 반환
                         start_time = time.time()
                         yield answer
             yield answer
-            
+
         finally:
             ChatGPT.is_answering = False
-        
+
         # stream의 경우 토큰을 셀 수 없다고 한다. 
-            
 
     @staticmethod
     def get_token_usage():
