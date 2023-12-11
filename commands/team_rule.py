@@ -4,8 +4,8 @@ from discord.ext import commands
 from chatgpt import ChatGPT
 
 # TODO 더 나은 팀 규칙 생성 프롬프트 작성
-# PROMPT_CREATE_RULE = "팀을 위한 규칙을 나열해. 조원이 불참했을 때, 분쟁이 있을 때 등등"
-PROMPT_CREATE_RULE = "say '12. This is a Test'"
+PROMPT_CREATE_RULE = "팀을 위한 규칙을 9개 나열해. 조원이 불참했을 때, 분쟁이 있을 때 등등"
+# PROMPT_CREATE_RULE = "say '12. This is a Test'"
 
 
 class TeamRule(commands.Cog):
