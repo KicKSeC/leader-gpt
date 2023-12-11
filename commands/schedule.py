@@ -190,7 +190,7 @@ class Schedule(commands.Cog):
                     color=0x3498db
                 )
 
-                channel = self.bot.get_channel(Settings.load('channel'))
+                channel = self.bot.get_channel(Settings.load('channel', is_setting=True))
                 if not channel is None:  
                     await channel.send(embed=embed)
 
